@@ -20,11 +20,11 @@ class UserController extends Controller
     // Mengubah jabatan/role user
     public function updateRole(Request $request, User $user)
     {
+        // Tambahkan 'vip' di dalam daftar role yang diizinkan
         $request->validate([
-            'role' => 'required|in:admin,user', // Bisa ditambah 'kasir', 'crafter', dll nanti
+            'role' => 'required|in:admin,vip,user', 
         ]);
 
-        // Mencegah Super Admin mengubah rolenya sendiri secara tidak sengaja
         if ($user->id === auth()->id()) {
             return back()->withErrors(['error' => 'Anda tidak bisa mengubah role Anda sendiri!']);
         }

@@ -4,6 +4,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\DepositController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\StorageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,13 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/deposits/partner', [DepositController::class, 'setPartner'])->name('deposits.partner');
 
     // ==========================================
-    // RUTE ADMIN / OWNER (FICO & MANAGEMENT SAJA)
+    // RUTE OPERASIONAL (ADMIN & VIP BISA AKSES)
     // ==========================================
-    Route::middleware(['can:manage-redvox'])->group(function () {
-        
-        // Manajemen User & Role (Hanya Admin)
-        Route::get('/users', [App\Http\Controllers\UserController::class, 'index'])->name('users.index');
-        Route::patch('/users/{user}/role', [App\Http\Controllers\UserController::class, 'updateRole'])->name('users.updateRole');
+    Route::middleware(['can:operate-pos'])->group(function () {
         
         // Manajemen Harga Dasar
         Route::resource('items', ItemController::class)->except(['index', 'show']);
@@ -51,6 +48,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Manajemen Gudang & Kendaraan
         Route::resource('storages', StorageController::class);
+    });
+
+    // ==========================================
+    // RUTE KHUSUS SUPER ADMIN (HANYA FICO)
+    // ==========================================
+    Route::middleware(['can:manage-users'])->group(function () {
+        // Manajemen Hak Akses Warga
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
     });
 });
 

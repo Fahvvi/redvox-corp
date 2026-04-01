@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-// TAMBAHKAN 'investors' pada props di bawah ini
 export default function Create({ auth, investors }) {
     const [cart, setCart] = useState([]);
 
@@ -17,7 +16,6 @@ export default function Create({ auth, investors }) {
         return cart.reduce((sum, item) => sum + (item.buy_price * item.qty), 0);
     }, [cart]);
 
-    // TAMBAHKAN 'investor_id: null' pada useForm
     const { data, setData, post, processing, errors } = useForm({
         supplier_name: '',
         location: 'Gudang Flint',
@@ -34,7 +32,6 @@ export default function Create({ auth, investors }) {
     }, [cart, totalBelanja]);
 
     const handleCashChange = (val) => {
-        // Hapus angka 0 di depan (kecuali kalau memang cuma angka 0)
         let cleanVal = val.replace(/^0+(?=\d)/, ''); 
         const cash = parseInt(cleanVal) || 0;
         
@@ -63,6 +60,12 @@ export default function Create({ auth, investors }) {
         });
     };
 
+    // ==========================================
+    // LOGIKA DETEKSI PARTNER JV
+    // ==========================================
+    const selectedInvestor = investors?.find(inv => inv.id === parseInt(data.investor_id));
+    const partner = selectedInvestor?.partner_id ? investors.find(inv => inv.id === selectedInvestor.partner_id) : null;
+
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Mesin Kasir (POS) - Redvox Corp" />
@@ -75,13 +78,12 @@ export default function Create({ auth, investors }) {
 
                 <div className="grid lg:grid-cols-2 gap-8">
                     
-                    {/* BAGIAN KIRI: FORM DATA PENJUAL */}
+                    {/* BAGIAN KIRI: FORM DATA */}
                     <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
                         <form onSubmit={submit} className="space-y-6">
                             
-                            {/* Alert jika ada error dari backend */}
                             {errors.error && (
-                                <div className="bg-red-50 text-red-600 p-4 rounded-xl font-bold border border-red-200">
+                                <div className="bg-red-50 text-red-700 p-4 rounded-xl font-bold border border-red-200">
                                     {errors.error}
                                 </div>
                             )}
@@ -113,15 +115,16 @@ export default function Create({ auth, investors }) {
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Metode Pembayaran (Split Payment)</h3>
-                                <div className="grid grid-cols-2 gap-4">
+                                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Metode Pembayaran & Distribusi</h3>
+                                
+                                <div className="grid grid-cols-2 gap-4 mb-4">
                                     <div className="bg-green-50 p-4 rounded-xl border border-green-200">
                                         <label className="block text-sm font-bold text-green-800 mb-1">Bayar Cash ($)</label>
                                         <input 
                                             type="number" 
                                             min="0"
                                             className="w-full px-3 py-2 bg-white border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none font-black text-green-700"
-                                            value={data.cash_deduction}
+                                            value={data.cash_deduction === 0 ? '' : data.cash_deduction}
                                             onChange={e => handleCashChange(e.target.value)}
                                         />
                                     </div>
@@ -131,31 +134,57 @@ export default function Create({ auth, investors }) {
                                             type="number" 
                                             min="0"
                                             className="w-full px-3 py-2 bg-white border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-black text-blue-700"
-                                            value={data.deposit_deduction}
+                                            value={data.deposit_deduction === 0 ? '' : data.deposit_deduction}
                                             onChange={e => handleDepositChange(e.target.value)}
                                         />
                                     </div>
                                 </div>
-                                {errors.payment && <p className="text-red-500 text-sm font-bold mt-2 bg-red-50 p-2 rounded">{errors.payment}</p>}
+                                {errors.payment && <p className="text-red-500 text-sm font-bold mb-4">{errors.payment}</p>}
                                 
-                                {/* MUNCUL OTOMATIS JIKA ADA UANG MASUK DEPOSIT */}
-                                {data.deposit_deduction > 0 && (
-                                    <div className="mt-4 bg-orange-50 p-4 rounded-xl border border-orange-200">
-                                        <label className="block text-sm font-bold text-orange-800 mb-1">Pilih Akun Web Investor *</label>
-                                        <select 
-                                            className="w-full px-3 py-2 bg-white border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-gray-800 font-medium"
-                                            value={data.investor_id}
-                                            onChange={e => setData('investor_id', e.target.value)}
-                                        >
-                                            <option value="">-- Pilih Akun Warga --</option>
-                                            {investors && investors.map(inv => (
-                                                <option key={inv.id} value={inv.id}>{inv.name} ({inv.email})</option>
-                                            ))}
-                                        </select>
-                                        {errors.investor_id && <p className="text-red-500 text-sm font-bold mt-2">{errors.investor_id}</p>}
-                                        <p className="text-xs text-orange-600 mt-2 font-medium">Uang deposit akan ditambahkan otomatis ke brankas akun ini.</p>
-                                    </div>
-                                )}
+                                <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
+                                    <label className="block text-sm font-bold text-orange-800 mb-1">Akun Penerima Barang (Wajib) *</label>
+                                    <select 
+                                        className="w-full px-3 py-2 bg-white border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-gray-800 font-medium"
+                                        value={data.investor_id}
+                                        onChange={e => setData('investor_id', e.target.value)}
+                                        required
+                                    >
+                                        <option value="">-- Pilih Akun Penerima / Investor --</option>
+                                        {investors && investors.map(inv => (
+                                            <option key={inv.id} value={inv.id}>{inv.name} ({inv.email})</option>
+                                        ))}
+                                    </select>
+                                    {errors.investor_id && <p className="text-red-500 text-sm font-bold mt-2">{errors.investor_id}</p>}
+                                    
+                                    {/* PANEL INFORMASI JOINT VENTURE */}
+                                    {partner ? (
+                                        <div className="mt-4 bg-blue-100/50 p-3 rounded-lg border border-blue-200">
+                                            <p className="text-sm font-bold text-blue-800 flex items-center gap-1">
+                                                <span>🤝</span> Kontrak Joint Venture Aktif!
+                                            </p>
+                                            <p className="text-xs text-blue-700 mt-1 font-medium">
+                                                Barang genap akan dibagi rata dengan <span className="font-black">{partner.name}</span>.
+                                            </p>
+                                            
+                                            {/* Estimasi Potongan 50:50 */}
+                                            {data.deposit_deduction > 0 && (
+                                                <div className="mt-2 pt-2 border-t border-blue-200/50 space-y-1">
+                                                    <p className="text-[11px] font-bold text-blue-800 uppercase tracking-wider">Estimasi Potong Brankas:</p>
+                                                    <div className="flex justify-between text-xs text-blue-700">
+                                                        <span>{selectedInvestor.name}</span>
+                                                        <span className="font-bold">-${(data.deposit_deduction / 2).toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-xs text-blue-700">
+                                                        <span>{partner.name}</span>
+                                                        <span className="font-bold">-${(data.deposit_deduction / 2).toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-orange-600 mt-2 font-medium">Barang akan masuk ke inventaris akun ini. Jika ada Deposit, akan masuk ke brankasnya.</p>
+                                    )}
+                                </div>
                             </div>
 
                             <button 

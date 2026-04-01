@@ -5,8 +5,9 @@ export default function AuthenticatedLayout({ user, children }) {
     // State untuk membuka/menutup menu di HP
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
-    // Cek apakah user adalah Admin
+    // Cek apakah user adalah Admin atau VIP
     const isAdmin = user.role === 'admin';
+    const isVIP = user.role === 'admin' || user.role === 'vip';
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-orange-500 selection:text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
@@ -28,16 +29,18 @@ export default function AuthenticatedLayout({ user, children }) {
                                     Dashboard
                                 </Link>
                                 
-                                {/* MENU KHUSUS ADMIN */}
+                                {/* MENU KHUSUS VIP & ADMIN */}
+                                {isVIP && (
+                                    <Link href={route('pos.create')} className="text-sm font-bold text-gray-500 hover:text-orange-500 transition">
+                                        Kasir (POS)
+                                    </Link>
+                                )}
+
+                                {/* MENU KHUSUS ADMIN SAJA */}
                                 {isAdmin && (
-                                    <>
-                                        <Link href={route('pos.create')} className="text-sm font-bold text-gray-500 hover:text-orange-500 transition">
-                                            Kasir (POS)
-                                        </Link>
-                                        <Link href={route('users.index')} className="text-sm font-bold text-gray-500 hover:text-orange-500 transition">
-                                            Akses Karyawan
-                                        </Link>
-                                    </>
+                                    <Link href={route('users.index')} className="text-sm font-bold text-gray-500 hover:text-orange-500 transition">
+                                        Akses Karyawan
+                                    </Link>
                                 )}
 
                                 <Link href={route('kalkulator')} className="text-sm font-bold text-gray-500 hover:text-orange-500 transition">
@@ -103,15 +106,18 @@ export default function AuthenticatedLayout({ user, children }) {
                             Dashboard
                         </Link>
                         
+                        {/* MENU KHUSUS VIP & ADMIN DI MOBILE */}
+                        {isVIP && (
+                            <Link href={route('pos.create')} className="block py-3 text-base font-bold text-gray-600 hover:text-orange-500 border-b border-gray-100">
+                                Kasir (POS)
+                            </Link>
+                        )}
+
+                        {/* MENU KHUSUS ADMIN DI MOBILE */}
                         {isAdmin && (
-                            <>
-                                <Link href={route('pos.create')} className="block py-3 text-base font-bold text-gray-600 hover:text-orange-500 border-b border-gray-100">
-                                    Kasir (POS)
-                                </Link>
-                                <Link href={route('users.index')} className="block py-3 text-base font-bold text-gray-600 hover:text-orange-500 border-b border-gray-100">
-                                    Manajemen Akses Karyawan
-                                </Link>
-                            </>
+                            <Link href={route('users.index')} className="block py-3 text-base font-bold text-gray-600 hover:text-orange-500 border-b border-gray-100">
+                                Manajemen Akses Karyawan
+                            </Link>
                         )}
 
                         <Link href={route('kalkulator')} className="block py-3 text-base font-bold text-gray-600 hover:text-orange-500 border-b border-gray-100">

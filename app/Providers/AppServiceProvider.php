@@ -22,9 +22,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('manage-redvox', function (User $user) {
+        // Gembok 1: Khusus Super Admin (Untuk Manage Role)
+        Gate::define('manage-users', function ($user) {
             return $user->role === 'admin';
         });
-        Vite::prefetch(concurrency: 3);
+
+        // Gembok 2: Untuk Operasional Kasir & Barang (Admin & VIP Boleh Masuk)
+        Gate::define('operate-pos', function ($user) {
+            return in_array($user->role, ['admin', 'vip']);
+        });
     }
 }

@@ -72,12 +72,13 @@ export default function Index({ auth, users }) {
                                         <td className="px-6 py-4 text-center">
                                             {u.id !== auth.user.id ? (
                                                 <select
-                                                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer"
-                                                    value={u.role}
-                                                    onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                                                >
-                                                    <option value="user">Warga / Investor</option>
-                                                    <option value="admin">Super Admin</option>
+                                                className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition cursor-pointer"
+                                                value={u.role}
+                                                onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                                            >
+                                                <option value="user">Warga / Investor</option>
+                                                <option value="vip">VIP (Akses Kasir)</option>
+                                                <option value="admin">Super Admin</option>
                                                 </select>
                                             ) : (
                                                 <span className="text-gray-300 text-sm font-bold italic">Terproteksi</span>
