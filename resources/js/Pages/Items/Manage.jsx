@@ -53,11 +53,11 @@ export default function Manage({ auth, items }) {
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kategori</label>
                                     <select className="w-full rounded-xl border-gray-200 text-sm focus:ring-orange-500" value={data.category} onChange={e => setData('category', e.target.value)} required>
                                         <option value="">Pilih...</option>
-                                        <option value="Logam">Logam</option>
-                                        <option value="Kayu">Kayu</option>
-                                        <option value="Elektronik">Elektronik</option>
-                                        <option value="Ilegal">Ilegal / Mafia</option>
-                                        <option value="Lainnya">Lainnya</option>
+                                        <option value="Logam">JAHIT</option>
+                                        <option value="Kayu">KEHUTANAN</option>
+                                        <option value="Elektronik">MINYAK</option>
+                                        <option value="Ilegal">PANGAN</option>
+                                        <option value="Lainnya">PERTAMBANGAN</option>
                                     </select>
                                 </div>
                                 <div>

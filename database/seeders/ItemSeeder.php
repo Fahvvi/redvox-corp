@@ -18,11 +18,11 @@ class ItemSeeder extends Seeder
 
             // PERTAMBANGAN
             ['name' => 'Batu (Stone)', 'category' => 'Pertambangan', 'buy_price' => 20, 'sell_price' => 135],
-            ['name' => 'Biji Perak', 'category' => 'Pertambangan', 'buy_price' => 20, 'sell_price' => null],
-            ['name' => 'Biji Tembaga', 'category' => 'Pertambangan', 'buy_price' => 30, 'sell_price' => null],
-            ['name' => 'Biji Belerang', 'category' => 'Pertambangan', 'buy_price' => 35, 'sell_price' => null],
-            ['name' => 'Biji Emas', 'category' => 'Pertambangan', 'buy_price' => 80, 'sell_price' => null],
-            ['name' => 'Biji Berlian', 'category' => 'Pertambangan', 'buy_price' => 95, 'sell_price' => null],
+            ['name' => 'Biji Perak', 'category' => 'Pertambangan', 'buy_price' => 20, 'sell_price' => 0],
+            ['name' => 'Biji Tembaga', 'category' => 'Pertambangan', 'buy_price' => 30, 'sell_price' => 0],
+            ['name' => 'Biji Belerang', 'category' => 'Pertambangan', 'buy_price' => 35, 'sell_price' => 0],
+            ['name' => 'Biji Emas', 'category' => 'Pertambangan', 'buy_price' => 80, 'sell_price' => 0],
+            ['name' => 'Biji Berlian', 'category' => 'Pertambangan', 'buy_price' => 95, 'sell_price' => 0],
             ['name' => 'Batang Perak', 'category' => 'Pertambangan', 'buy_price' => 450, 'sell_price' => 600],
             ['name' => 'Batang Tembaga', 'category' => 'Pertambangan', 'buy_price' => 450, 'sell_price' => 600],
             ['name' => 'Batang Berlian', 'category' => 'Pertambangan', 'buy_price' => 450, 'sell_price' => 600],
@@ -30,7 +30,7 @@ class ItemSeeder extends Seeder
             ['name' => 'Batang Emas', 'category' => 'Pertambangan', 'buy_price' => 1250, 'sell_price' => 1650],
 
             // MINYAK & ENERGI
-            ['name' => 'Minyak Bumi', 'category' => 'Minyak', 'buy_price' => 35, 'sell_price' => null],
+            ['name' => 'Minyak Bumi', 'category' => 'Minyak', 'buy_price' => 35, 'sell_price' => 0],
             ['name' => 'Bensin', 'category' => 'Minyak', 'buy_price' => 230, 'sell_price' => 300],
             ['name' => 'Solar', 'category' => 'Minyak', 'buy_price' => 230, 'sell_price' => 300],
             ['name' => 'Disel', 'category' => 'Minyak', 'buy_price' => 230, 'sell_price' => 300],
@@ -45,16 +45,14 @@ class ItemSeeder extends Seeder
             ['name' => 'Beras', 'category' => 'Pangan', 'buy_price' => 50, 'sell_price' => 115],
             ['name' => 'Kopi', 'category' => 'Pangan', 'buy_price' => 50, 'sell_price' => 115],
             ['name' => 'Teh Celup', 'category' => 'Pangan', 'buy_price' => 50, 'sell_price' => 115],
-            ['name' => 'Garam', 'category' => 'Pangan', 'buy_price' => 50, 'sell_price' => null],
-            ['name' => 'Gula', 'category' => 'Pangan', 'buy_price' => 50, 'sell_price' => null],
-        
+            ['name' => 'Garam', 'category' => 'Pangan', 'buy_price' => 50, 'sell_price' => 0],
+            ['name' => 'Gula', 'category' => 'Pangan', 'buy_price' => 50, 'sell_price' => 0],
         
             // JAHIT
             ['name' => 'Benang', 'category' => 'Jahit', 'buy_price' => 95, 'sell_price' => 35],
             ['name' => 'Kain', 'category' => 'Jahit', 'buy_price' => 400, 'sell_price' => 75],
             ['name' => 'Pakaian', 'category' => 'Jahit', 'buy_price' => 1200, 'sell_price' => 25],
-        
-            ];
+        ];
 
         foreach ($items as $item) {
             Item::create($item);
