@@ -10,17 +10,18 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('items', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('category'); // Contoh: Pertambangan, Kehutanan, Minyak
-            $table->integer('buy_price')->default(0); // Harga beli Redvox
-            $table->integer('sell_price')->nullable(); // Estimasi harga jual ke NPC
-            $table->string('image_url')->nullable(); // Untuk foto barang di E-commerce
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('items', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->string('category'); // Logam, Kayu, Elektronik, dll
+        $table->decimal('buy_price', 15, 2)->default(0); // Harga beli dari warga
+        $table->decimal('sell_price', 15, 2)->default(0); // Harga jual ke pengepul/pembeli
+        $table->string('image_url')->nullable(); // Untuk foto barang di E-commerce
+        $table->string('unit')->default('pcs'); // pcs, kg, slot
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Create({ auth, investors }) {
+export default function Create({ auth, partner }) {
     const [cart, setCart] = useState([]);
 
     useEffect(() => {
@@ -22,7 +22,6 @@ export default function Create({ auth, investors }) {
         notes: '',
         cash_deduction: 0,
         deposit_deduction: 0,
-        investor_id: '', 
         cart: []
     });
 
@@ -60,12 +59,6 @@ export default function Create({ auth, investors }) {
         });
     };
 
-    // ==========================================
-    // LOGIKA DETEKSI PARTNER JV
-    // ==========================================
-    const selectedInvestor = investors?.find(inv => inv.id === parseInt(data.investor_id));
-    const partner = selectedInvestor?.partner_id ? investors.find(inv => inv.id === selectedInvestor.partner_id) : null;
-
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Mesin Kasir (POS) - Redvox Corp" />
@@ -83,7 +76,7 @@ export default function Create({ auth, investors }) {
                         <form onSubmit={submit} className="space-y-6">
                             
                             {errors.error && (
-                                <div className="bg-red-50 text-red-700 p-4 rounded-xl font-bold border border-red-200">
+                                <div className="bg-red-50 text-red-700 p-4 rounded-xl font-bold border border-red-200 break-words">
                                     {errors.error}
                                 </div>
                             )}
@@ -115,7 +108,7 @@ export default function Create({ auth, investors }) {
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Metode Pembayaran & Distribusi</h3>
+                                <h3 className="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Pembayaran & Distribusi Barang</h3>
                                 
                                 <div className="grid grid-cols-2 gap-4 mb-4">
                                     <div className="bg-green-50 p-4 rounded-xl border border-green-200">
@@ -141,48 +134,33 @@ export default function Create({ auth, investors }) {
                                 </div>
                                 {errors.payment && <p className="text-red-500 text-sm font-bold mb-4">{errors.payment}</p>}
                                 
-                                <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
-                                    <label className="block text-sm font-bold text-orange-800 mb-1">Akun Penerima Barang (Wajib) *</label>
-                                    <select 
-                                        className="w-full px-3 py-2 bg-white border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-gray-800 font-medium"
-                                        value={data.investor_id}
-                                        onChange={e => setData('investor_id', e.target.value)}
-                                        required
-                                    >
-                                        <option value="">-- Pilih Akun Penerima / Investor --</option>
-                                        {investors && investors.map(inv => (
-                                            <option key={inv.id} value={inv.id}>{inv.name} ({inv.email})</option>
-                                        ))}
-                                    </select>
-                                    {errors.investor_id && <p className="text-red-500 text-sm font-bold mt-2">{errors.investor_id}</p>}
+                                {/* KARTU INFORMASI PENERIMA BARANG OTOMATIS */}
+                                <div className={`p-4 rounded-xl border ${partner ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Tujuan Inventaris</p>
                                     
-                                    {/* PANEL INFORMASI JOINT VENTURE */}
+                                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200/60">
+                                        <span className="font-bold text-gray-900 flex items-center gap-2">
+                                            <span>👤</span> Anda ({auth.user.name})
+                                        </span>
+                                        <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded font-bold">Pembeli Utama</span>
+                                    </div>
+
                                     {partner ? (
-                                        <div className="mt-4 bg-blue-100/50 p-3 rounded-lg border border-blue-200">
-                                            <p className="text-sm font-bold text-blue-800 flex items-center gap-1">
-                                                <span>🤝</span> Kontrak Joint Venture Aktif!
+                                        <>
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold text-orange-700 flex items-center gap-2">
+                                                    <span>🤝</span> {partner.name}
+                                                </span>
+                                                <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded font-bold">Partner JV</span>
+                                            </div>
+                                            <p className="text-[11px] text-orange-600 mt-3 font-medium">
+                                                Sistem mendeteksi kontrak kerja sama. Saldo deposit dan barang (genap) akan dibagi otomatis 50:50. Barang ganjil diberikan kepada Anda.
                                             </p>
-                                            <p className="text-xs text-blue-700 mt-1 font-medium">
-                                                Barang genap akan dibagi rata dengan <span className="font-black">{partner.name}</span>.
-                                            </p>
-                                            
-                                            {/* Estimasi Potongan 50:50 */}
-                                            {data.deposit_deduction > 0 && (
-                                                <div className="mt-2 pt-2 border-t border-blue-200/50 space-y-1">
-                                                    <p className="text-[11px] font-bold text-blue-800 uppercase tracking-wider">Estimasi Potong Brankas:</p>
-                                                    <div className="flex justify-between text-xs text-blue-700">
-                                                        <span>{selectedInvestor.name}</span>
-                                                        <span className="font-bold">-${(data.deposit_deduction / 2).toLocaleString()}</span>
-                                                    </div>
-                                                    <div className="flex justify-between text-xs text-blue-700">
-                                                        <span>{partner.name}</span>
-                                                        <span className="font-bold">-${(data.deposit_deduction / 2).toLocaleString()}</span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
+                                        </>
                                     ) : (
-                                        <p className="text-xs text-orange-600 mt-2 font-medium">Barang akan masuk ke inventaris akun ini. Jika ada Deposit, akan masuk ke brankasnya.</p>
+                                        <p className="text-[11px] text-gray-500 mt-2 font-medium">
+                                            Seluruh barang akan masuk ke "Kantong Mengambang" Anda dan saldo (jika ada deposit) akan dipotong sepenuhnya dari brankas Anda.
+                                        </p>
                                     )}
                                 </div>
                             </div>

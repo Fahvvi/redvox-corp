@@ -6,24 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('storages', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Contoh: "Rancher Hitam", "Gudang Dillimore"
-            $table->enum('type', ['vehicle', 'warehouse', 'safe'])->default('vehicle'); // Jenis penyimpanan
-            $table->string('plate_number')->nullable(); // Plat nomor jika itu kendaraan
-            $table->foreignId('pic_user_id')->nullable()->constrained('users')->onDelete('set null'); // Siapa yang pegang kunci/bertanggung jawab
+            
+            // 1. Tambahkan pemilik Gudang/Kendaraan/Paket
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete(); 
+            
+            $table->string('name'); // Nama Tempat (Gudang Flint / Benson Hitam / Paket Mafia)
+            $table->string('type'); // Tipe: 'warehouse', 'vehicle', 'package'
+            
+            // 2. Kolom tambahan untuk detail kendaraan & paket
+            $table->string('vehicle_id')->nullable(); // Plat Nomor / ID Kendaraan
+            $table->string('location_detail')->nullable(); // Koordinat lokasi
+            $table->string('package_type')->nullable(); // 'furniture', 'restoran', 'mafia'
+            
+            $table->integer('capacity')->default(5000);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('storages');

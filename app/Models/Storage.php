@@ -3,22 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Storage extends Model
 {
-    protected $fillable = ['name', 'type', 'plate_number', 'pic_user_id'];
+    protected $fillable = [
+        'user_id', 
+        'name', 
+        'type', 
+        'vehicle_id', 
+        'location_detail', 
+        'package_type', 
+        'capacity'
+    ];
 
-    // Siapa pemegang kunci bagasi ini?
-    public function pic(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'pic_user_id');
-    }
-
-    // Isi bagasinya apa saja?
-    public function inventories(): HasMany
+    public function inventories()
     {
         return $this->hasMany(Inventory::class);
+    }
+    
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
