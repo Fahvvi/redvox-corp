@@ -29,10 +29,24 @@ class ItemController extends Controller
     // ==========================================
     // Tampilan Manajemen Harga (Hanya Admin/VIP)
     // ==========================================
-    public function manage()
+    public function manage(Request $request)
     {
-        return Inertia::render('Items/Manage', [ // File baru: Items/Manage.jsx
-            'items' => Item::orderBy('category')->get()
+        $items = Item::query()
+            ->when($request->search, function ($query, $search) {
+                // Pencarian tidak sensitif huruf besar/kecil
+                $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%']);
+            })
+            ->when($request->category, function ($query, $category) {
+                $query->where('category', $category);
+            })
+            ->orderBy('category')
+            ->orderBy('name')
+            ->paginate(10) // Tampilkan 10 data per halaman
+            ->withQueryString(); // Bawa parameter pencarian ke halaman berikutnya
+
+        return Inertia::render('Items/Manage', [
+            'items' => $items,
+            'filters' => $request->only(['search', 'category'])
         ]);
     }
 
