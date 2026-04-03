@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 
-export default function Index({ auth, items }) {
+export default function Index({ auth, items, leaderboardData = {} }) {
     const [search, setSearch] = useState('');
     const [cart, setCart] = useState([]);
     const [showingMobileMenu, setShowingMobileMenu] = useState(false);
@@ -37,44 +37,104 @@ export default function Index({ auth, items }) {
         return { buy };
     }, [cart]);
 
+    // Kamus Terjemahan Kategori Leaderboard agar tampil rapi dan ber-ikon
+    const categoryConfig = {
+        donator: { title: 'Top Donator', icon: '💎', unit: 'IDR' },
+        playhours: { title: 'Top Playhours', icon: '⏱️', unit: 'Jam' },
+        staff: { title: 'Top Staff', icon: '🛡️', unit: 'Skor' },
+        gangturf: { title: 'Top Gang Turf', icon: '🏴‍☠️', unit: 'Turf' },
+        playingtime: { title: 'Top Playing Time', icon: '⏳', unit: '' },
+        truck: { title: 'Top Trucker', icon: '🚚', unit: 'Trip' },
+        harvester: { title: 'Top Harvester', icon: '🚜', unit: 'Panen' },
+        pizza: { title: 'Top Pizza Delivery', icon: '🍕', unit: 'Delivery' },
+        penebang: { title: 'Top Penebang Pohon', icon: '🌲', unit: 'Pohon' },
+        penambangbatu: { title: 'Top Penambang Batu', icon: '🪨', unit: 'Batu' },
+        penambangminyak: { title: 'Top Penambang Minyak', icon: '🛢️', unit: 'Barrel' },
+        penjahit: { title: 'Top Penjahit', icon: '🧵', unit: 'Jahitan' },
+        peternak: { title: 'Top Peternak', icon: '🐄', unit: 'Ternak' },
+        pilot: { title: 'Top Pilot', icon: '✈️', unit: 'Jam Terbang' },
+        mekanik: { title: 'Top Mekanik', icon: '🔧', unit: 'Servis' },
+        fisherman: { title: 'Top Nelayan', icon: '🎣', unit: 'Ikan' },
+        bus: { title: 'Top Supir Bus', icon: '🚌', unit: 'Rute' },
+        sweeper: { title: 'Top Sweeper', icon: '🧹', unit: 'Jalan' },
+        berburu: { title: 'Top Pemburu', icon: '🦌', unit: 'Hewan' },
+    };
+
+    // Fungsi aman untuk memformat angka
+    const formatScore = (score) => {
+        if (!isNaN(score) && score !== '') {
+            return Number(score).toLocaleString();
+        }
+        return score; 
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800 selection:bg-orange-500 selection:text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
             <Head title="Redvox Corp - Market Hub" />
 
             {/* =========================================
-                NAVBAR PUBLIK (SUPER CLEAN)
+                NAVBAR PUBLIK (ELEGANT & LENGKAP)
             ========================================= */}
-            <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+            <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         
-                        {/* Kiri: Logo (Tanpa menu tambahan) */}
+                        {/* Kiri: Logo */}
                         <div className="flex items-center">
                             <Link href="/" className="text-2xl md:text-3xl font-black tracking-wider text-orange-500 hover:scale-105 transition transform">
                                 REDVOX<span className="text-gray-900">.</span>
                             </Link>
                         </div>
 
-                        {/* Kanan: Auth Buttons (Desktop) */}
-                        <div className="hidden md:flex items-center font-bold">
+                        {/* Kanan: Menu Desktop */}
+                        <div className="hidden lg:flex items-center gap-8 font-bold">
+                            {/* Navigasi Halaman */}
+                            <div className="flex items-center gap-6">
+                                <a href="#kalkulator" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
+                                    Kalkulator
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
+                                </a>
+                                <a href="#crafting" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
+                                    Resep Crafting
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
+                                </a>
+                                <a href="#b2b" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
+                                    Paket Bisnis
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
+                                </a>
+                                <a href="#leaderboard" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
+                                    Papan Peringkat
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
+                                </a>
+                            </div>
+                            
+                            {/* Garis Pemisah */}
+                            <div className="w-px h-6 bg-gray-200"></div>
+
+                            {/* Tombol Akses Sistem */}
                             {auth.user ? (
-                                <Link href={route('dashboard')} className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-orange-500 text-white rounded-full shadow-md transition text-sm">
+                                <Link href={route('dashboard')} className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-orange-500 text-white rounded-full shadow-md transition transform hover:-translate-y-0.5 text-sm">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                                     Dashboard
                                 </Link>
                             ) : (
-                                <Link href={route('login')} className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 hover:bg-orange-500 hover:text-white text-gray-700 rounded-full shadow-sm transition text-sm border border-gray-200 hover:border-orange-500">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                    Portal Login
-                                </Link>
+                                <div className="flex items-center gap-3">
+                                    <Link href={route('login')} className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-full transition text-sm border border-gray-200">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+                                        Masuk
+                                    </Link>
+                                    <Link href={route('register')} className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-md transition transform hover:-translate-y-0.5 text-sm">
+                                        Daftar VIP
+                                    </Link>
+                                </div>
                             )}
                         </div>
 
                         {/* Hamburger Button (Mobile) */}
-                        <div className="flex md:hidden">
+                        <div className="flex lg:hidden">
                             <button 
                                 onClick={() => setShowingMobileMenu(!showingMobileMenu)}
-                                className="p-2 text-gray-500 hover:bg-gray-100 rounded-xl focus:outline-none transition"
+                                className="p-2 text-gray-500 hover:bg-gray-100 hover:text-orange-500 rounded-xl focus:outline-none transition"
                             >
                                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path className={!showingMobileMenu ? 'inline-flex' : 'hidden'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -85,18 +145,39 @@ export default function Index({ auth, items }) {
                     </div>
                 </div>
 
-                {/* Mobile Menu Dropdown (Hanya untuk Login/Auth) */}
-                <div className={`${showingMobileMenu ? 'block' : 'hidden'} md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full`}>
-                    <div className="px-4 py-4 flex flex-col gap-3">
+                {/* Mobile Menu Dropdown */}
+                <div className={`${showingMobileMenu ? 'block' : 'hidden'} lg:hidden bg-white border-t border-gray-100 shadow-2xl absolute w-full`}>
+                    <div className="px-4 py-6 flex flex-col gap-2">
+                        {/* Navigasi Mobile */}
+                        <a href="#kalkulator" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
+                            <span className="text-lg">🧮</span> Kalkulator Pengepul
+                        </a>
+                        <a href="#crafting" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
+                            <span className="text-lg">🛠️</span> Panduan Crafting
+                        </a>
+                        <a href="#b2b" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
+                            <span className="text-lg">📦</span> Paket Suplai Bisnis
+                        </a>
+                        <a href="#leaderboard" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
+                            <span className="text-lg">🏆</span> Papan Peringkat
+                        </a>
+                        
+                        <div className="h-px bg-gray-100 my-3"></div>
+
+                        {/* Tombol Akses Mobile */}
                         {auth.user ? (
-                            <Link href={route('dashboard')} className="w-full text-center px-6 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-orange-500 transition">
+                            <Link href={route('dashboard')} className="w-full text-center px-6 py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-orange-500 transition shadow-md">
                                 Masuk Dashboard
                             </Link>
                         ) : (
-                            <>
-                                <Link href={route('login')} className="w-full text-center px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition">Login Karyawan</Link>
-                                <Link href={route('register')} className="w-full text-center px-6 py-3 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition">Daftar VIP</Link>
-                            </>
+                            <div className="grid grid-cols-2 gap-3">
+                                <Link href={route('login')} className="w-full text-center px-4 py-3.5 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition border border-gray-200">
+                                    Login
+                                </Link>
+                                <Link href={route('register')} className="w-full text-center px-4 py-3.5 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition shadow-md">
+                                    Daftar VIP
+                                </Link>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -128,7 +209,7 @@ export default function Index({ auth, items }) {
             {/* =========================================
                 AREA KALKULATOR INTERAKTIF
             ========================================= */}
-            <section id="kalkulator" className="py-12 md:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
+            <section id="kalkulator" className="py-12 md:py-16 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-20">
                 <div className="grid lg:grid-cols-3 gap-8">
                     
                     {/* BAGIAN KIRI: DAFTAR BARANG */}
@@ -196,7 +277,7 @@ export default function Index({ auth, items }) {
 
                     {/* BAGIAN KANAN: KERANJANG KALKULATOR */}
                     <div className="lg:col-span-1">
-                        <div className="bg-gray-900 rounded-3xl shadow-2xl p-6 md:p-8 lg:sticky lg:top-24 border border-gray-800">
+                        <div className="bg-gray-900 rounded-3xl shadow-2xl p-6 md:p-8 lg:sticky lg:top-28 border border-gray-800">
                             <div className="flex justify-between items-center border-b border-gray-700 pb-4 mb-4">
                                 <h3 className="text-xl font-black text-white flex items-center gap-2">
                                     <span className="text-orange-500">🛒</span> Keranjang
@@ -255,7 +336,7 @@ export default function Index({ auth, items }) {
             {/* =========================================
                 INFORMASI CRAFTING (WIKI SECTION)
             ========================================= */}
-            <section className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200">
+            <section id="crafting" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
                         Crafting Wiki
@@ -268,7 +349,6 @@ export default function Index({ auth, items }) {
                 
                 {/* GRID 6 KATEGORI */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    
                     {/* 1. Lumber */}
                     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col h-full">
                         <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl mb-4 border border-orange-100">🌲</div>
@@ -386,7 +466,7 @@ export default function Index({ auth, items }) {
             {/* =========================================
                 LAYANAN B2B REDVOX (PAKET)
             ========================================= */}
-            <section className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200">
+            <section id="b2b" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
                         Layanan B2B Redvox
@@ -449,22 +529,15 @@ export default function Index({ auth, items }) {
                         </div>
                     </div>
 
-
-                
                     {/* 4. Paket Custom (Full Width Banner) */}
                     <div className="md:col-span-3 bg-gray-900 rounded-3xl border border-gray-800 shadow-xl overflow-hidden group hover:shadow-2xl transition duration-300 relative flex flex-col md:flex-row">
-                        {/* Efek Cahaya Latar */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-red-500 blur-[100px] opacity-20 group-hover:opacity-40 transition pointer-events-none"></div>
-                        
-                        {/* Bagian Kiri: Ikon */}
                         <div className="md:w-1/3 h-48 md:h-auto bg-gray-800 relative overflow-hidden border-b md:border-b-0 md:border-r border-gray-700 flex-shrink-0">
                             <div className="absolute inset-0 bg-gradient-to-tr from-red-500/10 to-transparent"></div>
                             <div className="absolute inset-0 flex items-center justify-center text-7xl md:text-8xl transform group-hover:scale-110 transition duration-500">
                                 🔫
                             </div>
                         </div>
-
-                        {/* Bagian Kanan: Teks & Tombol */}
                         <div className="p-8 md:p-10 relative z-10 flex flex-col justify-center flex-grow">
                             <h3 className="text-2xl md:text-3xl font-black text-white mb-3">Paket Custom</h3>
                             <p className="text-gray-400 text-sm md:text-base mb-8 font-medium leading-relaxed max-w-4xl">
@@ -482,9 +555,77 @@ export default function Index({ auth, items }) {
             </section>
 
             {/* =========================================
+                LEADERBOARD SECTION (DATA DARI LARAVEL)
+            ========================================= */}
+            <section id="leaderboard" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
+                <div className="text-center mb-10">
+                    <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
+                        Hall of Fame
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">Peringkat Pekerja Kota</h2>
+                    <p className="text-gray-500 font-medium text-lg">
+                        Daftar warga dengan kontribusi dan dedikasi tertinggi di berbagai sektor pekerjaan Indolife.
+                    </p>
+                </div>
+
+                {(!leaderboardData || Object.keys(leaderboardData).length === 0) ? (
+                    <div className="bg-white p-10 rounded-3xl shadow-sm text-center text-gray-500 border border-gray-100 font-medium">
+                        Data leaderboard saat ini tidak tersedia atau server sedang gangguan.
+                    </div>
+                ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Object.entries(leaderboardData).map(([categoryKey, players]) => {
+                            const config = categoryConfig[categoryKey] || { 
+                                title: `Top ${categoryKey}`, 
+                                icon: '🎯', 
+                                unit: 'Skor' 
+                            };
+
+                            return (
+                                <div key={categoryKey} className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
+                                    <div className="bg-gray-900 px-6 py-5 border-b border-gray-800">
+                                        <h3 className="font-black text-white text-lg flex items-center gap-3">
+                                            <span className="text-2xl">{config.icon}</span> {config.title}
+                                        </h3>
+                                    </div>
+                                    <ul className="divide-y divide-gray-50 flex-grow bg-white p-2">
+                                        {Array.isArray(players) && players.length > 0 ? (
+                                            players.slice(0, 5).map((player, idx) => (
+                                                <li key={idx} className="flex items-center justify-between px-4 py-3 hover:bg-orange-50/50 rounded-xl transition group">
+                                                    <div className="flex items-center gap-4">
+                                                        <span className={`w-8 h-8 flex items-center justify-center font-black text-sm rounded-lg shadow-sm ${
+                                                            idx === 0 ? 'bg-yellow-100 text-yellow-600 border border-yellow-200' :
+                                                            idx === 1 ? 'bg-gray-100 text-gray-600 border border-gray-200' :
+                                                            idx === 2 ? 'bg-orange-100 text-orange-700 border border-orange-200' :
+                                                            'bg-gray-50 text-gray-400 border border-gray-100'
+                                                        }`}>
+                                                            {idx + 1}
+                                                        </span>
+                                                        <span className="font-bold text-gray-800 text-sm">{player.name || player.player_name}</span>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="text-sm font-black text-orange-600 bg-orange-50 px-3 py-1 rounded-lg border border-orange-100">
+                                                            {formatScore(player.score)}
+                                                        </span>
+                                                        {config.unit && <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 pr-1">{config.unit}</div>}
+                                                    </div>
+                                                </li>
+                                            ))
+                                        ) : (
+                                            <li className="px-4 py-8 text-center text-sm text-gray-400 font-medium">Data belum tersedia</li>
+                                        )}
+                                    </ul>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </section>
+
+            {/* =========================================
                 FOOTER PUBLIK
             ========================================= */}
-            <footer className="bg-white border-t border-gray-200 py-10">
+            <footer className="bg-white border-t border-gray-200 py-10 mt-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center">
                     <div className="text-2xl font-black tracking-wider text-gray-300 mb-4">
                         REDVOX<span className="text-gray-200">.</span>

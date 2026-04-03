@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,5 +32,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('operate-pos', function ($user) {
             return in_array($user->role, ['admin', 'vip']);
         });
+
+        // URL::forceScheme('https');
+        // URL::forceRootUrl(config('app.url'));
+        
     }
 }

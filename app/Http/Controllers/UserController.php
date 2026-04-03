@@ -8,29 +8,32 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    // Menampilkan daftar semua user
     public function index()
     {
-        $users = User::orderBy('name')->get();
+        // Urutkan dari yang paling baru mendaftar (agar yang pending ada di atas)
+        $users = User::orderBy('created_at', 'desc')->get();
+        
         return Inertia::render('Users/Index', [
             'users' => $users
         ]);
     }
 
-    // Mengubah jabatan/role user
     public function updateRole(Request $request, User $user)
     {
-        // Tambahkan 'vip' di dalam daftar role yang diizinkan
         $request->validate([
-            'role' => 'required|in:admin,vip,user', 
+            'role' => 'required|in:pending,user,vip,admin' // Tambahkan 'pending' di sini
         ]);
-
-        if ($user->id === auth()->id()) {
-            return back()->withErrors(['error' => 'Anda tidak bisa mengubah role Anda sendiri!']);
-        }
 
         $user->update(['role' => $request->role]);
 
-        return back()->with('success', "Hak akses {$user->name} berhasil diubah menjadi " . strtoupper($request->role) . "!");
+        return back()->with('success', "Status akses {$user->name} berhasil diperbarui!");
+    }
+
+    public function destroy(User $user)
+    {
+        $name = $user->name;
+        $user->delete();
+
+        return back()->with('success', "Pendaftaran akun {$name} berhasil ditolak dan dihapus permanen.");
     }
 }

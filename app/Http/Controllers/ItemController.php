@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Http;
 
 class ItemController extends Controller
 {
@@ -13,8 +14,31 @@ class ItemController extends Controller
     // ==========================================
     public function index()
     {
+        $items = Item::all(); // Mengambil data item Anda
+        $leaderboards = [];
+
+        try {
+            // JURUS RAHASIA: Abaikan SSL & Menyamar jadi Browser Chrome
+            $response = Http::withoutVerifying()
+                ->withUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+                ->timeout(10) // Kasih waktu lebih lama (10 detik)
+                ->get('https://indoliferoleplay.com/api/leaderboard');
+            
+            if ($response->successful()) {
+                $leaderboards = $response->json();
+            } else {
+                // Hapus tanda // di bawah ini jika Anda ingin melihat status errornya (misal 403 atau 500)
+                // dd("Error HTTP Status: " . $response->status()); 
+            }
+        } catch (\Exception $e) {
+            // Hapus tanda // di bawah ini jika Anda ingin melihat penyebab gagalnya
+            // dd("Error Sistem: " . $e->getMessage()); 
+            $leaderboards = []; 
+        }
+
         return Inertia::render('Items/Index', [
-            'items' => Item::orderBy('category')->orderBy('name')->get()
+            'items' => $items,
+            'leaderboardData' => $leaderboards
         ]);
     }
 
