@@ -70,7 +70,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800 selection:bg-orange-500 selection:text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            <Head title="Redvox Corp - Market Hub" />
+            <Head title="Redfox Corp - Market Hub" />
 
             {/* =========================================
                 NAVBAR PUBLIK (ELEGANT & LENGKAP)
@@ -82,7 +82,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         {/* Kiri: Logo */}
                         <div className="flex items-center">
                             <Link href="/" className="text-2xl md:text-3xl font-black tracking-wider text-orange-500 hover:scale-105 transition transform">
-                                REDVOX<span className="text-gray-900">.</span>
+                                REDFOX<span className="text-gray-900">.</span>
                             </Link>
                         </div>
 
@@ -194,7 +194,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             Pusat Pengepul Side-Job
                         </span>
                         <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 text-gray-900 tracking-tight leading-tight">
-                            Jual Materialmu ke <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">Redvox.</span>
+                            Jual Materialmu ke <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">Redfox.</span>
                         </h1>
                         <p className="text-base sm:text-lg text-gray-500 mb-8 font-medium">
                             Gunakan kalkulator pintar ini untuk menghitung total uang yang akan kamu dapatkan sebelum membawa materialmu ke gudang kami.
@@ -238,7 +238,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                         <tr className="text-xs uppercase tracking-widest text-gray-500 font-bold">
                                             <th className="px-5 py-4 w-16 text-center">Aksi</th>
                                             <th className="px-5 py-4">Nama Material</th>
-                                            <th className="px-5 py-4 text-right">Harga Beli Redvox</th>
+                                            <th className="px-5 py-4 text-right">Harga Beli Redfox</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
@@ -343,7 +343,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                     </span>
                     <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">Panduan Pengolahan Material</h2>
                     <p className="text-gray-500 font-medium text-lg">
-                        Pelajari resep dan kombinasi material untuk menciptakan barang dengan nilai jual yang jauh lebih tinggi di Redvox Corp.
+                        Pelajari resep dan kombinasi material untuk menciptakan barang dengan nilai jual yang jauh lebih tinggi di Redfox Corp.
                     </p>
                 </div>
                 
@@ -454,7 +454,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 <div className="mt-10 bg-gray-900 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
                     <div className="text-center sm:text-left">
                         <h4 className="text-xl font-black text-white mb-2">Tidak menemukan resep yang dicari?</h4>
-                        <p className="text-gray-400 text-sm font-medium">Temui staf internal Redvox di kota untuk negosiasi material rahasia.</p>
+                        <p className="text-gray-400 text-sm font-medium">Temui staf internal Redfox di kota untuk negosiasi material rahasia.</p>
                     </div>
                     <div className="px-6 py-3 bg-white/10 border border-gray-700 text-white font-bold rounded-full whitespace-nowrap cursor-not-allowed">
                         🔒 Akses Terbatas
@@ -464,16 +464,16 @@ export default function Index({ auth, items, leaderboardData = {} }) {
             </section>
 
             {/* =========================================
-                LAYANAN B2B REDVOX (PAKET)
+                LAYANAN B2B Redfox (PAKET)
             ========================================= */}
             <section id="b2b" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
-                        Layanan B2B Redvox
+                        Layanan B2B Redfox
                     </span>
                     <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">Paket Suplai Bisnis</h2>
                     <p className="text-gray-500 font-medium text-lg">
-                        Selain membeli material, Redvox Corp juga menyediakan paket bundling dalam jumlah besar untuk memenuhi kebutuhan bisnis dan faksi Anda di kota.
+                        Selain membeli material, Redfox Corp juga menyediakan paket bundling dalam jumlah besar untuk memenuhi kebutuhan bisnis dan faksi Anda di kota.
                     </p>
                 </div>
 
@@ -628,10 +628,10 @@ export default function Index({ auth, items, leaderboardData = {} }) {
             <footer className="bg-white border-t border-gray-200 py-10 mt-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center">
                     <div className="text-2xl font-black tracking-wider text-gray-300 mb-4">
-                        REDVOX<span className="text-gray-200">.</span>
+                        Redfox<span className="text-gray-200">.</span>
                     </div>
                     <p className="text-gray-400 font-medium text-sm">
-                        © {new Date().getFullYear()} Redvox Corp. Sistem Kalkulator Pengepul Resmi.
+                        © {new Date().getFullYear()} Redfox Corp. Sistem Kalkulator Pengepul Resmi.
                     </p>
                 </div>
             </footer>
