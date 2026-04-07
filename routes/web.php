@@ -76,3 +76,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// ==========================================
+// RUTE KHUSUS BOT DISCORD
+// ==========================================
+Route::get('/api/bot/items', function () {
+    return response()->json(\App\Models\Item::all());
+});
