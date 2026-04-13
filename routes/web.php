@@ -8,6 +8,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\InventoryController;
 use Illuminate\Support\Facades\Route;
+use GameQ\GameQ;
+use Illuminate\Support\Facades\Cache;
 
 // ==========================================
 // RUTE PUBLIK (GUEST)
@@ -82,4 +84,59 @@ require __DIR__.'/auth.php';
 // ==========================================
 Route::get('/api/bot/items', function () {
     return response()->json(\App\Models\Item::all());
+});
+
+// ==========================================
+// API STATUS SERVER MTA INDOLIFE
+// ==========================================
+Route::get('/api/server-status', function () {
+    $gameq = new GameQ();
+    $gameq->addServer([
+        'type' => 'mta',
+        'host' => '15.235.160.190:22003',
+        'id'   => 'indolife',
+        'options' => [
+            // Memaksa GameQ menggunakan port query standar MTA jika port bawaan gagal
+            'query_port' => 22126 
+        ]
+    ]);
+    
+    $results = $gameq->process();
+    $serverData = $results['indolife'] ?? null;
+
+    // JIKA INGIN MELIHAT ISI MENTAH DARI SERVER, HAPUS TANDA // DI BAWAH INI:
+    // return response()->json($serverData);
+
+    // Jika gagal ping
+    if (!$serverData || empty($serverData['gq_online'])) {
+        return response()->json([
+            'status' => 'offline', 
+            'players' => [], 
+            'count' => 0, 
+            'max' => 0,
+            'debug' => 'Ping UDP diblokir atau server down.'
+        ]);
+    }
+
+    // Mengambil nama-nama pemain
+    $players = [];
+    if (isset($serverData['players']) && is_array($serverData['players'])) {
+        foreach ($serverData['players'] as $player) {
+            // MTA kadang menggunakan key 'name' atau 'player'
+            if (!empty($player['name'])) {
+                $players[] = $player['name'];
+            } elseif (!empty($player['player'])) {
+                $players[] = $player['player'];
+            }
+        }
+    }
+
+    return response()->json([
+        'status' => 'online',
+        'hostname' => $serverData['gq_hostname'] ?? 'Indolife Roleplay',
+        // Harus menggunakan gq_ untuk variabel bawaan GameQ
+        'count' => $serverData['gq_numplayers'] ?? 0,
+        'max' => $serverData['gq_maxplayers'] ?? 0,
+        'players' => $players
+    ]);
 });

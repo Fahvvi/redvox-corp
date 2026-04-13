@@ -1,10 +1,31 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Index({ auth, items, leaderboardData = {} }) {
     const [search, setSearch] = useState('');
     const [cart, setCart] = useState([]);
     const [showingMobileMenu, setShowingMobileMenu] = useState(false);
+    
+    // State untuk Status Server
+    const [serverStatus, setServerStatus] = useState({
+        status: 'loading',
+        count: 0,
+        max: 0,
+        players: []
+    });
+
+    // Mengambil data status server secara live saat halaman dimuat
+    useEffect(() => {
+        axios.get('/api/server-status')
+            .then(res => {
+                setServerStatus(res.data);
+            })
+            .catch(err => {
+                console.error("Gagal mengambil status server", err);
+                setServerStatus(prev => ({ ...prev, status: 'error' }));
+            });
+    }, []);
 
     // Filter pencarian barang
     const filteredItems = items.filter(item => 
@@ -74,7 +95,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
             {/* =========================================
                 NAVBAR PUBLIK (ELEGANT & LENGKAP)
-            ========================================= */}
+            ======================================== */}
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
@@ -104,6 +125,10 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                 </a>
                                 <a href="#leaderboard" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
                                     Papan Peringkat
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
+                                </a>
+                                <a href="#status-server" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
+                                    Status Server
                                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
                                 </a>
                             </div>
@@ -160,6 +185,9 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         </a>
                         <a href="#leaderboard" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
                             <span className="text-lg">🏆</span> Papan Peringkat
+                        </a>
+                        <a href="#status-server" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
+                            <span className="text-lg">📡</span> Status Server
                         </a>
                         
                         <div className="h-px bg-gray-100 my-3"></div>
@@ -335,7 +363,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
             {/* =========================================
                 INFORMASI CRAFTING (WIKI SECTION)
-            ========================================= */}
+            ======================================== */}
             <section id="crafting" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
@@ -623,15 +651,91 @@ export default function Index({ auth, items, leaderboardData = {} }) {
             </section>
 
             {/* =========================================
+                SERVER STATUS SECTION (LIVE MONITOR)
+            ========================================= */}
+            <section id="status-server" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
+                <div className="text-center mb-10">
+                    <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
+                        Live Monitor
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">Status Server Kota</h2>
+                    <p className="text-gray-500 font-medium text-lg">
+                        Pantau jumlah warga yang sedang aktif di Indolife Roleplay secara real-time.
+                    </p>
+                </div>
+
+                <div className="max-w-3xl mx-auto bg-gray-900 border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl text-white">
+                    {/* Status Header */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-6 border-b border-gray-800 gap-4">
+                        <div>
+                            <h3 className="text-2xl font-black text-orange-500">MTA:SA Server</h3>
+                            <p className="text-base font-medium text-gray-400">Indolife Roleplay (Voice)</p>
+                        </div>
+                        
+                        {/* Indikator Status */}
+                        <div className="flex items-center gap-3 bg-gray-800 px-5 py-2.5 rounded-full border border-gray-700">
+                            {serverStatus.status === 'loading' && <span className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></span>}
+                            {serverStatus.status === 'online' && <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_12px_#22c55e]"></span>}
+                            {(serverStatus.status === 'offline' || serverStatus.status === 'error') && <span className="w-3 h-3 bg-red-500 rounded-full"></span>}
+                            <span className="text-sm font-bold uppercase tracking-wider text-gray-300">
+                                {serverStatus.status === 'online' ? 'ONLINE' : serverStatus.status === 'loading' ? 'MENYAMBUNG...' : 'OFFLINE'}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Total Pemain */}
+                    <div className="mb-8 flex justify-between items-end bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
+                        <div className="text-base font-bold text-gray-400 uppercase tracking-widest">Warga Terhubung</div>
+                        <div className="text-5xl font-black tracking-tighter">
+                            {serverStatus.status === 'online' ? (
+                                <><span className="text-white">{serverStatus.count}</span><span className="text-gray-500 text-2xl tracking-normal"> / {serverStatus.max}</span></>
+                            ) : (
+                                <span className="text-gray-600">- / -</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Daftar Pemain (Manifest) */}
+                    <div className="bg-gray-800/80 rounded-2xl border border-gray-700 p-5">
+                        <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4 flex items-center justify-between border-b border-gray-700 pb-3">
+                            <span>Manifes Penumpang Aktif</span>
+                            <span className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-md">{serverStatus.players.length} Terdeteksi</span>
+                        </div>
+                        
+                        <div className="max-h-72 overflow-y-auto custom-scrollbar pr-3">
+                            {serverStatus.status === 'loading' ? (
+                                <div className="text-center text-gray-400 font-medium text-sm py-10 flex flex-col items-center gap-3">
+                                    <svg className="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Memindai satelit MTA...
+                                </div>
+                            ) : serverStatus.status === 'online' && serverStatus.players.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {serverStatus.players.map((playerName, index) => (
+                                        <div key={index} className="flex items-center gap-3 text-sm font-bold text-gray-200 bg-gray-900 px-4 py-3 rounded-xl border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800 transition shadow-sm">
+                                            <span className="text-orange-500 text-lg">👤</span> {playerName}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center text-gray-500 text-sm py-10 font-medium">
+                                    Tidak ada warga yang terdeteksi atau server sedang kosong.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* =========================================
                 FOOTER PUBLIK
             ========================================= */}
-            <footer className="bg-white border-t border-gray-200 py-10 mt-16">
+            <footer className="bg-white border-t border-gray-200 py-10 mt-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center">
                     <div className="text-2xl font-black tracking-wider text-gray-300 mb-4">
-                        Redfox<span className="text-gray-200">.</span>
+                        REDFOX<span className="text-gray-200">.</span>
                     </div>
                     <p className="text-gray-400 font-medium text-sm">
-                        © {new Date().getFullYear()} Redfox Corp. Sistem Kalkulator Pengepul Resmi.
+                        © {new Date().getFullYear()} Redfox Corp. Sistem Terintegrasi Faksi Resmi.
                     </p>
                 </div>
             </footer>
