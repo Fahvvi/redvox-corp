@@ -1,0 +1,11 @@
+{
+  "name": "redvox-bot-daemon",
+  "version": "1.0.0",
+  "description": "Agen Discord Redvox ERP",
+  "main": "index.cjs",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "discord.js": "^14.14.0",
+    "dotenv": "^16.3.1"
+  }
+}

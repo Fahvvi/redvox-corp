@@ -1,32 +1,11 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useMemo, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useMemo } from 'react';
 
 export default function Index({ auth, items, leaderboardData = {} }) {
     const [search, setSearch] = useState('');
     const [cart, setCart] = useState([]);
     const [showingMobileMenu, setShowingMobileMenu] = useState(false);
     
-    // State untuk Status Server
-    const [serverStatus, setServerStatus] = useState({
-        status: 'loading',
-        count: 0,
-        max: 0,
-        players: []
-    });
-
-    // Mengambil data status server secara live saat halaman dimuat
-    useEffect(() => {
-        axios.get('/api/server-status')
-            .then(res => {
-                setServerStatus(res.data);
-            })
-            .catch(err => {
-                console.error("Gagal mengambil status server", err);
-                setServerStatus(prev => ({ ...prev, status: 'error' }));
-            });
-    }, []);
-
     // Filter pencarian barang
     const filteredItems = items.filter(item => 
         item.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -127,10 +106,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                     Papan Peringkat
                                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
                                 </a>
-                                <a href="#status-server" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
-                                    Status Server
-                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
-                                </a>
                             </div>
                             
                             {/* Garis Pemisah */}
@@ -186,9 +161,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         <a href="#leaderboard" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
                             <span className="text-lg">🏆</span> Papan Peringkat
                         </a>
-                        <a href="#status-server" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
-                            <span className="text-lg">📡</span> Status Server
-                        </a>
                         
                         <div className="h-px bg-gray-100 my-3"></div>
 
@@ -238,7 +210,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 AREA KALKULATOR INTERAKTIF
             ========================================= */}
             <section id="kalkulator" className="py-12 md:py-16 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-20">
-                <div className="grid lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     {/* BAGIAN KIRI: DAFTAR BARANG */}
                     <div className="lg:col-span-2">
@@ -260,37 +232,37 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         </div>
 
                         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div className="max-h-[600px] overflow-y-auto overflow-x-auto custom-scrollbar">
-                                <table className="w-full text-left min-w-[500px]">
+                            <div className="max-h-[600px] overflow-y-auto w-full custom-scrollbar">
+                                <table className="w-full text-left min-w-max md:min-w-full">
                                     <thead className="sticky top-0 z-10 bg-gray-50 border-b border-gray-200">
-                                        <tr className="text-xs uppercase tracking-widest text-gray-500 font-bold">
-                                            <th className="px-5 py-4 w-16 text-center">Aksi</th>
-                                            <th className="px-5 py-4">Nama Material</th>
-                                            <th className="px-5 py-4 text-right">Harga Beli Redfox</th>
+                                        <tr className="text-[10px] md:text-xs uppercase tracking-widest text-gray-500 font-bold">
+                                            <th className="px-3 md:px-5 py-4 w-12 md:w-16 text-center">Aksi</th>
+                                            <th className="px-3 md:px-5 py-4">Nama Material</th>
+                                            <th className="px-3 md:px-5 py-4 text-right">Harga Beli Redfox</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
                                         {filteredItems.length === 0 ? (
                                             <tr>
-                                                <td colSpan="3" className="text-center py-12 text-gray-400 font-medium">Material tidak ditemukan.</td>
+                                                <td colSpan="3" className="text-center py-12 text-gray-400 font-medium text-sm">Material tidak ditemukan.</td>
                                             </tr>
                                         ) : (
                                             filteredItems.map((item) => (
                                                 <tr key={item.id} className="hover:bg-orange-50/40 transition duration-150">
-                                                    <td className="px-5 py-4 text-center">
+                                                    <td className="px-3 md:px-5 py-3 md:py-4 text-center">
                                                         <button 
                                                             onClick={() => addToCart(item)}
-                                                            className="w-10 h-10 mx-auto bg-gray-100 text-gray-600 rounded-xl hover:bg-orange-500 hover:text-white font-black transition flex items-center justify-center"
+                                                            className="w-8 h-8 md:w-10 md:h-10 mx-auto bg-gray-100 text-gray-600 rounded-lg hover:bg-orange-500 hover:text-white font-black transition flex items-center justify-center text-sm md:text-base"
                                                         >
                                                             +
                                                         </button>
                                                     </td>
-                                                    <td className="px-5 py-4">
-                                                        <div className="font-bold text-gray-900 md:text-lg">{item.name}</div>
-                                                        <div className="text-[10px] text-gray-400 font-black uppercase tracking-wider">{item.category}</div>
+                                                    <td className="px-3 md:px-5 py-3 md:py-4">
+                                                        <div className="font-bold text-gray-900 text-sm md:text-lg">{item.name}</div>
+                                                        <div className="text-[9px] md:text-[10px] text-gray-400 font-black uppercase tracking-wider mt-0.5">{item.category}</div>
                                                     </td>
-                                                    <td className="px-5 py-4 text-right">
-                                                        <span className="text-green-600 font-black bg-green-50 px-3 py-1.5 rounded-lg text-sm md:text-base border border-green-100">
+                                                    <td className="px-3 md:px-5 py-3 md:py-4 text-right">
+                                                        <span className="text-green-600 font-black bg-green-50 px-2 py-1 md:px-3 md:py-1.5 rounded-lg text-xs md:text-base border border-green-100 whitespace-nowrap">
                                                             ${item.buy_price}
                                                         </span>
                                                     </td>
@@ -304,10 +276,10 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                     </div>
 
                     {/* BAGIAN KANAN: KERANJANG KALKULATOR */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-gray-900 rounded-3xl shadow-2xl p-6 md:p-8 lg:sticky lg:top-28 border border-gray-800">
+                    <div id="kalkulator-cart" className="lg:col-span-1 scroll-mt-24">
+                        <div className="bg-gray-900 rounded-3xl shadow-2xl p-5 md:p-8 lg:sticky lg:top-28 border border-gray-800">
                             <div className="flex justify-between items-center border-b border-gray-700 pb-4 mb-4">
-                                <h3 className="text-xl font-black text-white flex items-center gap-2">
+                                <h3 className="text-lg md:text-xl font-black text-white flex items-center gap-2">
                                     <span className="text-orange-500">🛒</span> Keranjang
                                 </h3>
                                 {cart.length > 0 && (
@@ -319,29 +291,29 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
                             <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                                 {cart.length === 0 ? (
-                                    <div className="text-center py-12 text-gray-500 text-sm font-medium border-2 border-dashed border-gray-700 rounded-2xl">
+                                    <div className="text-center py-10 md:py-12 text-gray-500 text-xs md:text-sm font-medium border-2 border-dashed border-gray-700 rounded-2xl">
                                         Klik tombol <b className="text-orange-500">+</b> pada tabel <br/>untuk mulai simulasi.
                                     </div>
                                 ) : (
                                     cart.map((c) => (
-                                        <div key={c.id} className="bg-gray-800 p-4 rounded-2xl border border-gray-700 relative group">
+                                        <div key={c.id} className="bg-gray-800 p-3.5 md:p-4 rounded-2xl border border-gray-700 relative group">
                                             <button 
                                                 onClick={() => removeFromCart(c.id)}
-                                                className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full text-xs font-bold md:opacity-0 md:group-hover:opacity-100 transition shadow-lg flex items-center justify-center"
+                                                className="absolute -top-2 -right-2 w-6 h-6 md:w-7 md:h-7 bg-red-500 text-white rounded-full text-xs font-bold md:opacity-0 md:group-hover:opacity-100 transition shadow-lg flex items-center justify-center"
                                             >
                                                 ✕
                                             </button>
-                                            <div className="font-bold text-gray-100 text-sm mb-3 truncate pr-4">{c.name}</div>
+                                            <div className="font-bold text-gray-100 text-xs md:text-sm mb-3 truncate pr-4">{c.name}</div>
                                             <div className="flex justify-between items-center gap-3">
                                                 <input 
                                                     type="number" 
                                                     min="0"
                                                     value={c.qty === 0 ? '' : c.qty}
                                                     onChange={(e) => updateQty(c.id, e.target.value)}
-                                                    className="w-20 bg-gray-900 border border-gray-600 rounded-xl text-white text-sm font-bold px-3 py-2 text-center focus:ring-2 focus:ring-orange-500 outline-none"
+                                                    className="w-16 md:w-20 bg-gray-900 border border-gray-600 rounded-xl text-white text-xs md:text-sm font-bold px-2 py-1.5 md:py-2 text-center focus:ring-2 focus:ring-orange-500 outline-none"
                                                 />
                                                 <div className="text-right">
-                                                    <div className="text-green-400 font-black">${(c.buy_price * c.qty).toLocaleString()}</div>
+                                                    <div className="text-green-400 font-black text-sm md:text-base">${(c.buy_price * c.qty).toLocaleString()}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -350,9 +322,9 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             </div>
 
                             <div className="mt-6 pt-6 border-t border-gray-700">
-                                <div className="flex flex-col space-y-2">
-                                    <span className="text-gray-400 font-bold text-xs uppercase tracking-widest">Estimasi Uang Diterima</span>
-                                    <span className="text-white font-black text-4xl">${totals.buy.toLocaleString()}</span>
+                                <div className="flex flex-col space-y-1 md:space-y-2">
+                                    <span className="text-gray-400 font-bold text-[10px] md:text-xs uppercase tracking-widest">Estimasi Uang Diterima</span>
+                                    <span className="text-white font-black text-3xl md:text-4xl">${totals.buy.toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
@@ -360,6 +332,19 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
                 </div>
             </section>
+
+            {/* FLOATING CART SUMMARY UNTUK MOBILE */}
+            {cart.length > 0 && (
+                <div className="lg:hidden fixed bottom-4 left-4 right-4 bg-gray-900 border border-gray-700 shadow-2xl rounded-2xl p-4 z-50 flex justify-between items-center animate-bounce-short">
+                    <div>
+                        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Total Estimasi</div>
+                        <div className="text-lg font-black text-green-400">${totals.buy.toLocaleString()}</div>
+                    </div>
+                    <a href="#kalkulator-cart" className="px-5 py-2.5 bg-orange-500 text-white text-xs font-bold rounded-xl shadow-md">
+                        Lihat Keranjang ({cart.length})
+                    </a>
+                </div>
+            )}
 
             {/* =========================================
                 INFORMASI CRAFTING (WIKI SECTION)
@@ -479,12 +464,12 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 </div>
                 
                 {/* Banner Bantuan */}
-                <div className="mt-10 bg-gray-900 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+                <div className="mt-10 bg-gray-900 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
                     <div className="text-center sm:text-left">
-                        <h4 className="text-xl font-black text-white mb-2">Tidak menemukan resep yang dicari?</h4>
-                        <p className="text-gray-400 text-sm font-medium">Temui staf internal Redfox di kota untuk negosiasi material rahasia.</p>
+                        <h4 className="text-lg md:text-xl font-black text-white mb-2">Tidak menemukan resep yang dicari?</h4>
+                        <p className="text-gray-400 text-xs md:text-sm font-medium">Temui staf internal Redfox di kota untuk negosiasi material rahasia.</p>
                     </div>
-                    <div className="px-6 py-3 bg-white/10 border border-gray-700 text-white font-bold rounded-full whitespace-nowrap cursor-not-allowed">
+                    <div className="px-6 py-3 bg-white/10 border border-gray-700 text-white font-bold rounded-full whitespace-nowrap cursor-not-allowed text-sm">
                         🔒 Akses Terbatas
                     </div>
                 </div>
@@ -512,8 +497,8 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent"></div>
                             <div className="absolute inset-0 flex items-center justify-center text-7xl transform group-hover:scale-110 transition duration-500">🛋️</div>
                         </div>
-                        <div className="p-8 flex flex-col flex-grow">
-                            <h3 className="text-2xl font-black text-gray-900 mb-2">Paket Furniture</h3>
+                        <div className="p-6 md:p-8 flex flex-col flex-grow">
+                            <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-2">Paket Furniture</h3>
                             <p className="text-gray-500 text-sm mb-8 font-medium flex-grow leading-relaxed">
                                 Suplai perabotan lengkap untuk dekorasi rumah, apartemen, atau kantor baru Anda. Langsung terima beres tanpa harus merakit bahan mentah satu per satu.
                             </p>
@@ -529,8 +514,8 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 to-transparent"></div>
                             <div className="absolute inset-0 flex items-center justify-center text-7xl transform group-hover:scale-110 transition duration-500">🍔</div>
                         </div>
-                        <div className="p-8 flex flex-col flex-grow">
-                            <h3 className="text-2xl font-black text-gray-900 mb-2">Paket Restaurant</h3>
+                        <div className="p-6 md:p-8 flex flex-col flex-grow">
+                            <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-2">Paket Restaurant</h3>
                             <p className="text-gray-500 text-sm mb-8 font-medium flex-grow leading-relaxed">
                                 Kebutuhan dapur dari bahan baku mentah (pertanian/peternakan), alat masak, hingga suplai bahan siap saji untuk menjaga restoran Anda beroperasi 24/7.
                             </p>
@@ -546,8 +531,8 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 to-transparent"></div>
                             <div className="absolute inset-0 flex items-center justify-center text-7xl transform group-hover:scale-110 transition duration-500">🔫</div>
                         </div>
-                        <div className="p-8 flex flex-col flex-grow">
-                            <h3 className="text-2xl font-black text-gray-900 mb-2">Paket Senjata</h3>
+                        <div className="p-6 md:p-8 flex flex-col flex-grow">
+                            <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-2">Paket Senjata</h3>
                             <p className="text-gray-500 text-sm mb-8 font-medium flex-grow leading-relaxed">
                                 Suplai logistik "khusus" berlisensi maupun tanpa lisensi. Diperuntukkan bagi penjagaan bisnis atau kebutuhan operasional tingkat tinggi faksi Anda.
                             </p>
@@ -563,16 +548,16 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         <div className="md:w-1/3 h-48 md:h-auto bg-gray-800 relative overflow-hidden border-b md:border-b-0 md:border-r border-gray-700 flex-shrink-0">
                             <div className="absolute inset-0 bg-gradient-to-tr from-red-500/10 to-transparent"></div>
                             <div className="absolute inset-0 flex items-center justify-center text-7xl md:text-8xl transform group-hover:scale-110 transition duration-500">
-                                🔫
+                                🤝
                             </div>
                         </div>
                         <div className="p-8 md:p-10 relative z-10 flex flex-col justify-center flex-grow">
                             <h3 className="text-2xl md:text-3xl font-black text-white mb-3">Paket Custom</h3>
                             <p className="text-gray-400 text-sm md:text-base mb-8 font-medium leading-relaxed max-w-4xl">
-                                Suplai logistik "khusus" berlisensi maupun tanpa lisensi. Diperuntukkan bagi penjagaan bisnis atau kebutuhan operasional tingkat tinggi faksi Anda. Kuantitas dan jenis barang dapat dinegosiasikan secara langsung.
+                                Butuh suplai yang tidak ada di katalog? Kuantitas dan jenis barang dapat dinegosiasikan secara langsung dengan tim kami.
                             </p>
                             <div className="md:self-start">
-                                <button className="w-full md:w-auto px-10 py-4 bg-white/10 hover:bg-red-600 text-white font-bold rounded-xl transition shadow-lg border border-gray-700 hover:border-red-500">
+                                <button className="w-full md:w-auto px-8 py-3.5 bg-white/10 hover:bg-red-600 text-white font-bold rounded-xl transition shadow-lg border border-gray-700 hover:border-red-500 text-sm md:text-base">
                                     Buka Jalur Khusus
                                 </button>
                             </div>
@@ -597,8 +582,8 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 </div>
 
                 {(!leaderboardData || Object.keys(leaderboardData).length === 0) ? (
-                    <div className="bg-white p-10 rounded-3xl shadow-sm text-center text-gray-500 border border-gray-100 font-medium">
-                        Data leaderboard saat ini tidak tersedia atau server sedang gangguan.
+                    <div className="bg-white p-10 rounded-3xl shadow-sm text-center text-gray-500 border border-gray-100 font-medium text-sm md:text-base">
+                        Data leaderboard saat ini tidak tersedia.
                     </div>
                 ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -611,17 +596,17 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
                             return (
                                 <div key={categoryKey} className="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
-                                    <div className="bg-gray-900 px-6 py-5 border-b border-gray-800">
-                                        <h3 className="font-black text-white text-lg flex items-center gap-3">
-                                            <span className="text-2xl">{config.icon}</span> {config.title}
+                                    <div className="bg-gray-900 px-5 md:px-6 py-4 md:py-5 border-b border-gray-800">
+                                        <h3 className="font-black text-white text-base md:text-lg flex items-center gap-3">
+                                            <span className="text-xl md:text-2xl">{config.icon}</span> {config.title}
                                         </h3>
                                     </div>
                                     <ul className="divide-y divide-gray-50 flex-grow bg-white p-2">
                                         {Array.isArray(players) && players.length > 0 ? (
                                             players.slice(0, 5).map((player, idx) => (
-                                                <li key={idx} className="flex items-center justify-between px-4 py-3 hover:bg-orange-50/50 rounded-xl transition group">
-                                                    <div className="flex items-center gap-4">
-                                                        <span className={`w-8 h-8 flex items-center justify-center font-black text-sm rounded-lg shadow-sm ${
+                                                <li key={idx} className="flex items-center justify-between px-3 md:px-4 py-3 hover:bg-orange-50/50 rounded-xl transition group">
+                                                    <div className="flex items-center gap-3 md:gap-4">
+                                                        <span className={`min-w-[28px] h-7 flex items-center justify-center font-black text-xs md:text-sm rounded-lg shadow-sm ${
                                                             idx === 0 ? 'bg-yellow-100 text-yellow-600 border border-yellow-200' :
                                                             idx === 1 ? 'bg-gray-100 text-gray-600 border border-gray-200' :
                                                             idx === 2 ? 'bg-orange-100 text-orange-700 border border-orange-200' :
@@ -629,18 +614,18 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                                         }`}>
                                                             {idx + 1}
                                                         </span>
-                                                        <span className="font-bold text-gray-800 text-sm">{player.name || player.player_name}</span>
+                                                        <span className="font-bold text-gray-800 text-xs md:text-sm">{player.name || player.player_name}</span>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className="text-sm font-black text-orange-600 bg-orange-50 px-3 py-1 rounded-lg border border-orange-100">
+                                                        <span className="text-xs md:text-sm font-black text-orange-600 bg-orange-50 px-2 py-1 rounded-lg border border-orange-100">
                                                             {formatScore(player.score)}
                                                         </span>
-                                                        {config.unit && <div className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 pr-1">{config.unit}</div>}
+                                                        {config.unit && <div className="text-[8px] md:text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 pr-1">{config.unit}</div>}
                                                     </div>
                                                 </li>
                                             ))
                                         ) : (
-                                            <li className="px-4 py-8 text-center text-sm text-gray-400 font-medium">Data belum tersedia</li>
+                                            <li className="px-4 py-8 text-center text-xs md:text-sm text-gray-400 font-medium">Data belum tersedia</li>
                                         )}
                                     </ul>
                                 </div>
@@ -651,82 +636,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
             </section>
 
             {/* =========================================
-                SERVER STATUS SECTION (LIVE MONITOR)
-            ========================================= */}
-            <section id="status-server" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
-                <div className="text-center mb-10">
-                    <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
-                        Live Monitor
-                    </span>
-                    <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">Status Server Kota</h2>
-                    <p className="text-gray-500 font-medium text-lg">
-                        Pantau jumlah warga yang sedang aktif di Indolife Roleplay secara real-time.
-                    </p>
-                </div>
-
-                <div className="max-w-3xl mx-auto bg-gray-900 border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl text-white">
-                    {/* Status Header */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-6 border-b border-gray-800 gap-4">
-                        <div>
-                            <h3 className="text-2xl font-black text-orange-500">MTA:SA Server</h3>
-                            <p className="text-base font-medium text-gray-400">Indolife Roleplay (Voice)</p>
-                        </div>
-                        
-                        {/* Indikator Status */}
-                        <div className="flex items-center gap-3 bg-gray-800 px-5 py-2.5 rounded-full border border-gray-700">
-                            {serverStatus.status === 'loading' && <span className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></span>}
-                            {serverStatus.status === 'online' && <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_12px_#22c55e]"></span>}
-                            {(serverStatus.status === 'offline' || serverStatus.status === 'error') && <span className="w-3 h-3 bg-red-500 rounded-full"></span>}
-                            <span className="text-sm font-bold uppercase tracking-wider text-gray-300">
-                                {serverStatus.status === 'online' ? 'ONLINE' : serverStatus.status === 'loading' ? 'MENYAMBUNG...' : 'OFFLINE'}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Total Pemain */}
-                    <div className="mb-8 flex justify-between items-end bg-gray-800/40 p-6 rounded-2xl border border-gray-700/50">
-                        <div className="text-base font-bold text-gray-400 uppercase tracking-widest">Warga Terhubung</div>
-                        <div className="text-5xl font-black tracking-tighter">
-                            {serverStatus.status === 'online' ? (
-                                <><span className="text-white">{serverStatus.count}</span><span className="text-gray-500 text-2xl tracking-normal"> / {serverStatus.max}</span></>
-                            ) : (
-                                <span className="text-gray-600">- / -</span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Daftar Pemain (Manifest) */}
-                    <div className="bg-gray-800/80 rounded-2xl border border-gray-700 p-5">
-                        <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-4 flex items-center justify-between border-b border-gray-700 pb-3">
-                            <span>Manifes Penumpang Aktif</span>
-                            <span className="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-md">{serverStatus.players.length} Terdeteksi</span>
-                        </div>
-                        
-                        <div className="max-h-72 overflow-y-auto custom-scrollbar pr-3">
-                            {serverStatus.status === 'loading' ? (
-                                <div className="text-center text-gray-400 font-medium text-sm py-10 flex flex-col items-center gap-3">
-                                    <svg className="animate-spin h-8 w-8 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    Memindai satelit MTA...
-                                </div>
-                            ) : serverStatus.status === 'online' && serverStatus.players.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {serverStatus.players.map((playerName, index) => (
-                                        <div key={index} className="flex items-center gap-3 text-sm font-bold text-gray-200 bg-gray-900 px-4 py-3 rounded-xl border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800 transition shadow-sm">
-                                            <span className="text-orange-500 text-lg">👤</span> {playerName}
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center text-gray-500 text-sm py-10 font-medium">
-                                    Tidak ada warga yang terdeteksi atau server sedang kosong.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* =========================================
                 FOOTER PUBLIK
             ========================================= */}
             <footer className="bg-white border-t border-gray-200 py-10 mt-8">
@@ -734,7 +643,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                     <div className="text-2xl font-black tracking-wider text-gray-300 mb-4">
                         REDFOX<span className="text-gray-200">.</span>
                     </div>
-                    <p className="text-gray-400 font-medium text-sm">
+                    <p className="text-gray-400 font-medium text-xs md:text-sm">
                         © {new Date().getFullYear()} Redfox Corp. Sistem Terintegrasi Faksi Resmi.
                     </p>
                 </div>

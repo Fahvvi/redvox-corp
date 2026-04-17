@@ -1,0 +1,56 @@
+services:
+  app:
+    build:
+      context: /share/container-data/redvox-erp
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - /share/container-data/redvox-erp:/var/www
+    networks:
+      - redvox-network
+
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "8099:80" # Web Redvox bisa diakses di http://IP-NAS:8080
+    volumes:
+      - /share/container-data/redvox-erp:/var/www
+      - /share/container-data/redvox-erp/docker/nginx/app.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - redvox-network
+
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: redvox_erp
+      POSTGRES_USER: redvox_user
+      POSTGRES_PASSWORD: redvox_password
+    volumes:
+      - redvox_postgres_data:/var/lib/postgresql/data
+    networks:
+      - redvox-network
+
+  # === TAMBAHAN MESIN PENYADAP / BOT DISCORD ===
+  bot:
+    image: node:18-alpine
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - /share/container-data/redvox-erp/bot:/app
+    # Bot akan menginstall package dan langsung online otomatis
+    command: sh -c "npm install && node index.cjs"
+    depends_on:
+      - app
+    networks:
+      - redvox-network
+
+networks:
+  redvox-network:
+    driver: bridge
+
+volumes:
+  redvox_postgres_data:

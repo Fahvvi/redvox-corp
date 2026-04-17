@@ -1,4 +1,4 @@
-require('dotenv').config({ path: __dirname + '/../.env' });
+require('dotenv').config();
 const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const axios = require('axios');
 
@@ -19,6 +19,42 @@ let cachedItems = [];
 // Session memori
 const activeSessions = new Map();
 const knownUsers = new Set();
+
+// ==========================================
+// KAMUS RESEP CRAFTING (SINKRON DENGAN WEBSITE)
+// ==========================================
+const CRAFTING_RECIPES = {
+    // Lumber
+    "kayu halus": "🌲 **4 Kayu Gelondong**",
+    "lem kayu": "🌲 **2 Getah** + 💧 **2 Air Putih**",
+    // Peternakan
+    "bulu ayam": "🐔 **1 Ayam Mati**",
+    "daging ayam": "🐔 **1 Ayam Mati**",
+    "kotoran": "🐔 **1 Ayam Mati**",
+    "daging sapi merah": "🐄 **1 Sapi Mati**",
+    // Penjahit
+    "benang": "🧵 **1 Bulu Ayam**",
+    "kain": "🧵 **2 Benang**",
+    "pakaian": "👕 **3 Benang** + 🥼 **3 Kain**",
+    // Agrikultur
+    "gula": "🌾 **2 Tebu** + 🥼 **2 Kain**",
+    "kopi": "☕ **2 Biji Kopi** + 🥼 **2 Kain**",
+    "garam": "🧂 **2 Bubuk Garam** + 🥼 **2 Kain**",
+    "teh celup": "🍵 **2 Teh** + 🥼 **2 Kain**",
+    "beras": "🍚 **2 Padi** + 🥼 **2 Kain**",
+    "pupuk": "💩 **10 Kotoran** + 🥼 **4 Kain**",
+    // Perminyakan
+    "bensin": "🛢️ **5 Minyak** + 🌲 **2 Getah**",
+    "solar": "🛢️ **5 Minyak** + 🌲 **2 Getah**",
+    "disel": "🛢️ **5 Minyak** + 🌲 **2 Getah**",
+    "avtur": "🛢️ **10 Minyak** + 🌲 **2 Getah**",
+    // Pertambangan
+    "perak": "⛏️ **5 Biji Perak** + 🌲 **2 Kayu Gelondong**",
+    "tembaga": "⛏️ **5 Biji Tembaga** + 🌲 **2 Kayu Gelondong**",
+    "belerang": "⛏️ **5 Biji Belerang** + 🌲 **2 Kayu Gelondong**",
+    "emas": "⛏️ **10 Biji Emas** + 🌲 **5 Kayu Gelondong**",
+    "berlian": "💎 **15 Biji Berlian** + 🌲 **5 Kayu Gelondong**"
+};
 
 client.once('clientReady', () => {
     console.log(`[REDVOX ERP] Sistem terhubung ke satelit. Bot online sebagai ${client.user.tag}!`);
@@ -42,19 +78,104 @@ client.on('messageCreate', async (message) => {
 
         const embedMenu = new EmbedBuilder()
             .setColor('#F97316')
-            .setTitle('🏢 Pusat Layanan Redvox Corp')
+            .setTitle('🏢 Pusat Layanan Redfox Corp')
             .setDescription(`Halo <@${message.author.id}>! Selamat datang di sistem otomatis kami. Berikut adalah akses command yang tersedia untuk Anda:`)
             .addFields(
-                { name: '🟢 Akses Publik (Pelanggan)', value: '`!beli` - Kalkulator belanja material\n`!paket` - Melihat katalog paket diskon\n`!request` - Formulir pemesanan khusus\n`!leaderboard` - Melihat Top Pengepul' },
-                { name: '🔴 Akses Internal (Staff/Admin)', value: '`!setor` - Kalkulator setoran pekerja\n`!broadcaststok` - Menyiarkan info stok ke publik' }
+                { name: '🟢 Akses Publik (Pelanggan & Pengepul)', value: '`!beli` - Kalkulator simulasi jual material\n`!harga [barang]` - Cek harga satuan secara cepat\n`!resep [barang]` - Ensiklopedia resep crafting\n`!paket` - Melihat katalog paket suplai B2B\n`!request` - Formulir pemesanan logistik khusus\n`!leaderboard` - Melihat Peringkat Pekerja Kota\n`!loker` - Info lowongan pekerjaan di Redfox' },
+                { name: '🔴 Akses Internal (Staff/Admin)', value: '`!setor` - Kalkulator setoran pekerja lapangan\n`!broadcaststok` - Menyiarkan info stok ke publik' }
             )
-            .setFooter({ text: 'Redvox Corp - Ekspedisi & Logistik Terpercaya' });
+            .setFooter({ text: 'Redfox Corp - Ekspedisi & Logistik Terpercaya' });
 
         if (command === '!menu' || command === '!help') {
             return message.reply({ embeds: [embedMenu] });
         } else {
             await message.channel.send({ embeds: [embedMenu] });
         }
+    }
+
+    // ---------------------------------------------------------
+    // COMMAND: !resep [nama_barang]
+    // ---------------------------------------------------------
+    if (command === '!resep') {
+        const query = args.slice(1).join(' ').toLowerCase();
+        
+        if (!query) {
+            return message.reply('⚠️ **Format Salah!** Gunakan: `!resep [nama barang]`\nContoh: `!resep bensin` atau `!resep pakaian`');
+        }
+
+        // Cari resep yang cocok atau mirip
+        const matchedKey = Object.keys(CRAFTING_RECIPES).find(key => key.includes(query) || query.includes(key));
+
+        if (matchedKey) {
+            const embedResep = new EmbedBuilder()
+                .setColor('#3B82F6')
+                .setTitle(`🛠️ Resep Crafting: ${matchedKey.toUpperCase()}`)
+                .setDescription(`Untuk membuat **${matchedKey}**, Anda membutuhkan material berikut:\n\n${CRAFTING_RECIPES[matchedKey]}`)
+                .setFooter({ text: 'Redfox Crafting Wiki' });
+            return message.reply({ embeds: [embedResep] });
+        } else {
+            return message.reply(`❌ Maaf, resep untuk **"${query}"** tidak ditemukan di database kami atau masuk dalam kategori rahasia perusahaan.`);
+        }
+    }
+
+    // ---------------------------------------------------------
+    // COMMAND: !harga [nama_barang]
+    // ---------------------------------------------------------
+    if (command === '!harga') {
+        const query = args.slice(1).join(' ').toLowerCase();
+        if (!query) return message.reply('⚠️ **Format Salah!** Gunakan: `!harga [nama barang]`\nContoh: `!harga biji emas`');
+
+        try {
+            // Ambil data jika cache kosong
+            if (cachedItems.length === 0) {
+                const response = await axios.get(API_URL);
+                cachedItems = response.data;
+            }
+
+            // Cari barang (kasus tidak sensitif huruf besar/kecil)
+            const foundItems = cachedItems.filter(item => item.name.toLowerCase().includes(query));
+
+            if (foundItems.length === 0) {
+                return message.reply(`❌ Material **"${query}"** tidak ditemukan di katalog Redfox.`);
+            }
+
+            const embedHarga = new EmbedBuilder()
+                .setColor('#10B981')
+                .setTitle(`💰 Informasi Harga Pengepul`);
+
+            let descText = '';
+            foundItems.slice(0, 5).forEach(item => { // Tampilkan maks 5 jika pencarian luas (misal: "biji")
+                const sellText = item.sell_price !== 'LOCKED' ? `$${item.sell_price.toLocaleString()}` : '🔒 (Item Crafting/Khusus)';
+                descText += `**${item.name}** [${item.category.toUpperCase()}]\n↳ Redfox Beli: **$${item.buy_price.toLocaleString()}** | NPC/Jual: **${sellText}**\n\n`;
+            });
+
+            if (foundItems.length > 5) descText += `*...dan ${foundItems.length - 5} item lainnya. Harap lebih spesifik.*`;
+
+            embedHarga.setDescription(descText);
+            return message.reply({ embeds: [embedHarga] });
+
+        } catch (err) {
+            console.error(err);
+            return message.reply('⚠️ Gagal terhubung ke database gudang pusat.');
+        }
+    }
+
+    // ---------------------------------------------------------
+    // COMMAND: !loker / !join
+    // ---------------------------------------------------------
+    if (command === '!loker' || command === '!join') {
+        const embedLoker = new EmbedBuilder()
+            .setColor('#EF4444')
+            .setTitle('🤝 Bergabunglah dengan Redfox Corp!')
+            .setThumbnail('https://i.imgur.com/K3ZpZ1Z.png') // Bisa diganti URL logo Redfox nanti
+            .setDescription('Kami selalu mencari talenta pekerja keras untuk menggerakkan roda ekonomi San Andreas. Jadilah bagian dari jaringan logistik terbesar di kota!')
+            .addFields(
+                { name: '💼 Posisi Tersedia', value: '• Supir Logistik / Freight\n• Spesialis Pengepul (Tambang/Penebang/Dll)\n• Keamanan Gudang\n• Staf Operasional' },
+                { name: '📍 Cara Melamar', value: '1. Kunjungi markas kami secara Roleplay (IC) di **Glenpark**.\n2. Temui manajer atau staf yang sedang bertugas.\n3. Siapkan tanda pengenal, lisensi mengemudi (untuk supir), dan niat kerja yang kuat!' }
+            )
+            .setFooter({ text: 'Redfox Corp - Masa Depan Logistik Anda' });
+        
+        return message.reply({ embeds: [embedLoker] });
     }
 
     // ---------------------------------------------------------
@@ -77,10 +198,10 @@ client.on('messageCreate', async (message) => {
             });
 
             const embedLb = new EmbedBuilder()
-                .setColor('#FFD700') // Warna Emas
-                .setTitle('🏆 Leaderboard Redvox Corp')
+                .setColor('#FFD700')
+                .setTitle('🏆 Peringkat Pengepul Redfox Corp')
                 .setDescription(boardText)
-                .setFooter({ text: 'Peringkat Pengepul & Karyawan Terbaik Server' })
+                .setFooter({ text: 'Data ditarik langsung dari sistem ERP' })
                 .setTimestamp();
             
             return message.reply({ embeds: [embedLb] });
@@ -110,7 +231,7 @@ client.on('messageCreate', async (message) => {
     if (command === '!paket') {
         const embedPaket = new EmbedBuilder()
             .setColor('#10B981')
-            .setTitle('📦 Katalog Paket Spesial Redvox Corp')
+            .setTitle('📦 Katalog Paket Spesial Redfox Corp')
             .setDescription('Hemat lebih banyak dengan membeli material dalam bentuk paket! Berikut adalah daftar paket yang tersedia saat ini:')
             .addFields(
                 { name: '- Paket Perak', value: '↳ 10x Perak\n↳ 30x Kayu Gelondong\n**Harga Khusus:** $5,000' },
@@ -157,7 +278,6 @@ client.on('messageCreate', async (message) => {
 
             const sessionType = command === '!setor' ? 'setor' : 'beli';
 
-            // Generate Komponen dengan Search = kosong
             const components = generateCalcComponents(cachedItems, '', sessionType);
 
             const calcMessage = await message.reply({
@@ -169,18 +289,18 @@ client.on('messageCreate', async (message) => {
                 authorId: message.author.id,
                 type: sessionType,
                 cart: {},
-                searchQuery: '' // Simpan kata kunci pencarian user
+                searchQuery: '' 
             });
 
         } catch (error) {
             console.error(error);
-            message.reply('Sistem sedang gangguan!');
+            message.reply('⚠️ Sistem sedang gangguan dalam mengambil data kalkulator.');
         }
     }
 });
 
 // ==========================================
-// MENGELOLA INTERAKSI
+// MENGELOLA INTERAKSI BUTTON & MODAL
 // ==========================================
 client.on('interactionCreate', async interaction => {
     
@@ -208,9 +328,9 @@ client.on('interactionCreate', async interaction => {
                 { name: '📝 Catatan', value: catatan }
             );
             await mainChannel.send({ embeds: [notifEmbed] });
-            await interaction.reply({ content: '✅ Pesanan dikirim ke pusat!', ephemeral: true });
+            await interaction.reply({ content: '✅ Pesanan berhasil dikirim ke markas pusat!', ephemeral: true });
         } else {
-            await interaction.reply({ content: '⚠️ Gagal mengirim pesanan.', ephemeral: true });
+            await interaction.reply({ content: '⚠️ Gagal mengirim pesanan. Sistem internal belum diatur.', ephemeral: true });
         }
         return;
     }
@@ -220,7 +340,7 @@ client.on('interactionCreate', async interaction => {
     if (!session) return; 
 
     if (interaction.user.id !== session.authorId) {
-        return interaction.reply({ content: 'Anda tidak bisa menggunakan kalkulator milik orang lain!', ephemeral: true });
+        return interaction.reply({ content: '⛔ Anda tidak bisa menggunakan alat hitung milik orang lain!', ephemeral: true });
     }
 
     // -- MEMBUKA MODAL CARI BARANG --
@@ -235,7 +355,7 @@ client.on('interactionCreate', async interaction => {
     // -- MENERIMA HASIL PENCARIAN --
     if (interaction.isModalSubmit() && interaction.customId === 'modal_search_item') {
         const query = interaction.fields.getTextInputValue('search_query');
-        session.searchQuery = query; // Update kata kunci
+        session.searchQuery = query; 
 
         const newComponents = generateCalcComponents(cachedItems, query, session.type);
         await interaction.update({ components: newComponents });
@@ -262,7 +382,7 @@ client.on('interactionCreate', async interaction => {
             session.cart[itemId] = (session.cart[itemId] || 0) + qty;
             await interaction.update({ embeds: [generateKalkulatorEmbed(session.cart, session.type)] });
         } else {
-            await interaction.reply({ content: '⚠️ Masukkan angka yang valid!', ephemeral: true });
+            await interaction.reply({ content: '⚠️ Masukkan nominal angka yang valid!', ephemeral: true });
         }
     }
 
@@ -277,27 +397,24 @@ client.on('interactionCreate', async interaction => {
             await interaction.update({ 
                 components: [], 
                 content: session.type === 'setor' 
-                    ? '✅ **Perhitungan Setoran Selesai!** Bawa material ke Gudang.'
-                    : '✅ **Keranjang Beli Terkunci!** Hubungi staf Redvox untuk serah terima.'
+                    ? '✅ **Perhitungan Setoran Selesai!** Segera bawa material ke Gudang.'
+                    : '✅ **Keranjang Beli Terkunci!** Hubungi staf Redvox untuk proses serah terima barang.'
             });
         }
     }
 });
 
 // ==========================================
-// FUNGSI BANTUAN GENERATOR
+// FUNGSI BANTUAN GENERATOR KALKULATOR
 // ==========================================
 
-// Memfilter barang & membuat tombol pencarian
 function generateCalcComponents(items, query, type) {
     let filtered = items;
     
-    // Filter berdasarkan pencarian jika ada
     if (query) {
         filtered = items.filter(i => i.name.toLowerCase().includes(query.toLowerCase()) || i.category.toLowerCase().includes(query.toLowerCase()));
     }
 
-    // Ambil maksimal 25 teratas
     const sliced = filtered.slice(0, 25);
     
     let rowDropdown;
@@ -317,11 +434,10 @@ function generateCalcComponents(items, query, type) {
         rowDropdown = new ActionRowBuilder().addComponents(selectMenu);
     }
 
-    // Tambahkan tombol Cari Barang di samping Kosongkan dan Selesai
     const rowButtons = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('btn_search').setLabel('Cari Barang').setStyle(ButtonStyle.Primary).setEmoji('🔍'),
         new ButtonBuilder().setCustomId('clear_cart').setLabel('Kosongkan').setStyle(ButtonStyle.Danger),
-        new ButtonBuilder().setCustomId('checkout').setLabel('Selesai').setStyle(ButtonStyle.Success)
+        new ButtonBuilder().setCustomId('checkout').setLabel('Kunci Transaksi').setStyle(ButtonStyle.Success)
     );
 
     return [rowDropdown, rowButtons];
@@ -354,12 +470,12 @@ function generateKalkulatorEmbed(cart, type) {
         .setColor(type === 'setor' ? '#F97316' : '#10B981') 
         .setTitle(type === 'setor' ? '🧮 Kalkulator Setoran Redvox' : '🛒 Redvox Store - Checkout')
         .setDescription(cartText === '' ? '*Keranjang masih kosong.*' : cartText)
-        .setFooter({ text: 'Data tersinkronisasi otomatis dengan Server Pusat' });
+        .setFooter({ text: 'Data tersinkronisasi otomatis dengan Server Pusat Redfox ERP' });
 
     if (type === 'setor') {
         embed.addFields(
-            { name: '💰 Total Modal', value: `$${totalModal.toLocaleString()}`, inline: true },
-            { name: '📈 Est. Profit Faksi', value: `+$${profit.toLocaleString()}`, inline: true }
+            { name: '💰 Total Modal Dikeluarkan', value: `$${totalModal.toLocaleString()}`, inline: true },
+            { name: '📈 Estimasi Profit Bersih', value: `+$${profit.toLocaleString()}`, inline: true }
         );
     } else {
         embed.addFields(

@@ -33,8 +33,7 @@ class AppServiceProvider extends ServiceProvider
             return in_array($user->role, ['admin', 'vip']);
         });
 
-        // URL::forceScheme('https');
-        // URL::forceRootUrl(config('app.url'));
-        
+        // --- HAPUS IF-NYA, LANGSUNG PAKSA HTTPS! ---
+        URL::forceScheme('https');
     }
 }
