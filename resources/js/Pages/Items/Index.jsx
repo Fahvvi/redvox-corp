@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Index({ auth, items, leaderboardData = {} }) {
     const [search, setSearch] = useState('');
@@ -7,17 +8,51 @@ export default function Index({ auth, items, leaderboardData = {} }) {
     const [cart, setCart] = useState([]);
     const [showingMobileMenu, setShowingMobileMenu] = useState(false);
     
-    // State Baru: Tipe Transaksi (standar, korporat, dinamis)
     const [transactionType, setTransactionType] = useState('standar');
-    // State Baru: Input Manual untuk Jalur Dinamis
     const [dynamicAdjustment, setDynamicAdjustment] = useState('');
 
-    // Mengambil daftar Kategori unik dari data items
+    // ==========================================
+    // FITUR: RADAR PENGUMUMAN HARGA (POLLING)
+    // ==========================================
+    const [announcement, setAnnouncement] = useState('');
+    const [showAnnouncement, setShowAnnouncement] = useState(false);
+    const [lastMessage, setLastMessage] = useState('');
+
+    useEffect(() => {
+        const fetchUpdates = () => {
+            // Mengambil dari /price-updates (bukan /api lagi)
+            axios.get('/price-updates')
+                .then(res => {
+                    const msg = res.data?.message;
+                    // Jika ada pesan baru yang berbeda dari pesan sebelumnya
+                    if (msg && msg !== lastMessage) {
+                        setAnnouncement(msg);
+                        setLastMessage(msg);
+                        setShowAnnouncement(true);
+                        
+                        // Sembunyikan spanduk setelah 15 detik (1 kali lewat)
+                        setTimeout(() => {
+                            setShowAnnouncement(false);
+                        }, 15000);
+                    }
+                })
+                .catch(err => {
+                    // Abaikan jika terjadi error jaringan ringan
+                });
+        };
+
+        fetchUpdates(); // Cek pertama kali
+        
+        // Polling setiap 5 detik (5000 ms) untuk testing.
+        const interval = setInterval(fetchUpdates, 5000); 
+        return () => clearInterval(interval);
+    }, [lastMessage]);
+    // ==========================================
+
     const categories = useMemo(() => {
         return [...new Set(items.map(item => item.category))];
     }, [items]);
 
-    // Filter pencarian barang (Search + Kategori)
     const filteredItems = items.filter(item => {
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                               item.category.toLowerCase().includes(search.toLowerCase());
@@ -30,32 +65,23 @@ export default function Index({ auth, items, leaderboardData = {} }) {
         setCart(prev => {
             const existing = prev.find(i => i.id === item.id);
             if (existing) {
-                // Jika sudah ada, tambah 1
                 return prev.map(i => i.id === item.id ? { ...i, qty: (Number(i.qty) || 0) + 1 } : i);
             }
-            // Jika belum ada, masukkan dengan qty 1 (sebagai Number)
             return [...prev, { ...item, qty: 1 }];
         });
     };
 
-    // PERBAIKAN BUG INPUT: Handle perubahan input text secara langsung tanpa jeda
     const handleQtyChange = (id, value) => {
-        // Biarkan string kosong '' jika user menghapus semua angka
         if (value === '') {
             setCart(prev => prev.map(i => i.id === id ? { ...i, qty: '' } : i));
             return;
         }
-        
-        // Hapus angka 0 di depan (contoh "05" menjadi "5") agar pengetikan mulus
         let cleanVal = value.replace(/^0+(?=\d)/, ''); 
-        
-        // Hanya update jika isinya benar-benar angka
         if (/^\d+$/.test(cleanVal)) {
             setCart(prev => prev.map(i => i.id === id ? { ...i, qty: parseInt(cleanVal, 10) } : i));
         }
     };
 
-    // UX Tambahan: Tombol Plus/Minus Cepat
     const incrementQty = (id) => {
         setCart(prev => prev.map(item => {
             if (item.id === id) {
@@ -76,7 +102,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
         }));
     };
 
-    // Saat input blur, jika kosong kembalikan ke 0
     const handleQtyBlur = (id) => {
         setCart(prev => prev.map(item => {
             if (item.id === id && item.qty === '') {
@@ -90,35 +115,26 @@ export default function Index({ auth, items, leaderboardData = {} }) {
         setCart(prev => prev.filter(i => i.id !== id));
     };
 
-    // LOGIKA KALKULATOR TIER HARGA
     const totals = useMemo(() => {
         let buy = 0; 
         cart.forEach(c => { 
-            // Pastikan qty adalah angka (fallback ke 0 jika string kosong)
             const itemQty = Number(c.qty) || 0;
             let basePrice = c.buy_price;
-            
-            // Logika Jalur Korporat (Eks-Mafia)
             if (transactionType === 'korporat') {
                 basePrice = basePrice * 1.33;
             }
-            
             buy += (basePrice * itemQty); 
         });
 
-        // Logika Jalur Dinamis (Khusus) - Tambahan global
         if (transactionType === 'dinamis') {
             const extra = parseFloat(dynamicAdjustment) || 0;
             buy += extra;
         }
 
-        // Pastikan tidak negatif
         if (buy < 0) buy = 0;
-
         return { buy };
     }, [cart, transactionType, dynamicAdjustment]);
 
-    // Kamus Terjemahan Kategori Leaderboard agar tampil rapi dan ber-ikon
     const categoryConfig = {
         donator: { title: 'Top Donator', icon: '💎', unit: 'IDR' },
         playhours: { title: 'Top Playhours', icon: '⏱️', unit: 'Jam' },
@@ -248,12 +264,42 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         )}
                     </div>
                 </div>
+
+                {/* =========================================
+                    PENGUMUMAN HARGA BERJALAN (MARQUEE)
+                ========================================= */}
+                {showAnnouncement && (
+                    <div className="bg-red-600 border-b border-red-700 py-2.5 overflow-hidden shadow-inner absolute w-full z-40 left-0 top-20">
+                        <div className="whitespace-nowrap animate-marquee flex items-center">
+                            <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
+                                <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
+                                {announcement}
+                            </span>
+                            <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
+                                <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
+                                {announcement}
+                            </span>
+                        </div>
+                        <style dangerouslySetInnerHTML={{__html: `
+                            @keyframes marquee {
+                                0% { transform: translateX(100vw); }
+                                100% { transform: translateX(-100%); }
+                            }
+                            .animate-marquee {
+                                display: inline-block;
+                                animation: marquee 15s linear forwards;
+                            }
+                        `}} />
+                    </div>
+                )}
+                {/* ----------------------------------------- */}
+
             </nav>
 
             {!auth.user && (
                 <header className="px-4 sm:px-6 py-16 md:py-24 text-center bg-white border-b border-gray-200 relative overflow-hidden">
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-50 via-white to-white opacity-80"></div>
-                    <div className="relative z-10 max-w-3xl mx-auto">
+                    <div className="relative z-10 max-w-3xl mx-auto mt-4">
                         <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-6 border border-orange-200">
                             Pusat Pengepul Side-Job
                         </span>
@@ -297,7 +343,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             </button>
                         </div>
 
-                        {/* Munculkan input tambahan hanya jika Jalur Dinamis */}
                         {transactionType === 'dinamis' && (
                             <div className="mt-4 animate-fade-in flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-200">
                                 <label className="font-bold text-sm text-gray-700 whitespace-nowrap">Input Penambahan / Diskon ($):</label>
@@ -315,7 +360,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
-                    {/* BAGIAN KIRI: DAFTAR BARANG */}
                     <div className="lg:col-span-2">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
                             <div>
@@ -323,9 +367,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                 <p className="text-gray-500 text-sm mt-1 font-medium">Klik tombol <b className="text-orange-500">+</b> untuk simulasi penjualan.</p>
                             </div>
                             
-                            {/* KONTROL FILTER & PENCARIAN */}
                             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                                {/* Filter Kategori */}
                                 <div className="relative w-full sm:w-44">
                                     <select 
                                         value={selectedCategory}
@@ -337,17 +379,14 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                             <option key={idx} value={cat}>{cat}</option>
                                         ))}
                                     </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                        ▼
-                                    </div>
+                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">▼</div>
                                 </div>
 
-                                {/* Cari Barang */}
                                 <div className="relative w-full sm:w-56">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
                                     <input 
                                         type="text" 
-                                        placeholder="Cari Biji Perak..." 
+                                        placeholder="Cari Material..." 
                                         className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium text-sm shadow-sm transition"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
@@ -400,7 +439,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         </div>
                     </div>
 
-                    {/* BAGIAN KANAN: KERANJANG KALKULATOR */}
                     <div id="kalkulator-cart" className="lg:col-span-1 scroll-mt-24">
                         <div className="bg-gray-900 rounded-3xl shadow-2xl p-4 md:p-8 lg:sticky lg:top-28 border border-gray-800">
                             <div className="flex justify-between items-center border-b border-gray-700 pb-4 mb-4">
@@ -421,7 +459,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                     </div>
                                 ) : (
                                     cart.map((c) => {
-                                        // Tampilkan indikator kenaikan harga jika Korporat
                                         const displayPrice = transactionType === 'korporat' ? c.buy_price * 1.33 : c.buy_price;
                                         const itemQty = Number(c.qty) || 0;
                                         const totalItemPrice = displayPrice * itemQty;
@@ -429,7 +466,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                         return (
                                             <div key={c.id} className="bg-gray-800 p-3 md:p-4 rounded-2xl border border-gray-700 relative group flex flex-col sm:flex-row justify-between gap-3">
                                                 
-                                                {/* Info Barang & Harga */}
                                                 <div className="flex-1 pr-6 sm:pr-2">
                                                     <div className="font-bold text-gray-100 text-sm mb-1 break-words leading-tight">
                                                         {c.name} {transactionType === 'korporat' && <span className="text-indigo-400 text-[10px]"> (+33%)</span>}
@@ -439,7 +475,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                                     </div>
                                                 </div>
 
-                                                {/* Control Qty & Subtotal */}
                                                 <div className="flex items-center justify-between sm:justify-end sm:flex-col gap-2 mt-2 sm:mt-0">
                                                     <div className="flex items-center bg-gray-900 border border-gray-600 rounded-lg overflow-hidden h-9 md:h-10">
                                                         <button 
@@ -510,7 +545,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 </div>
             )}
 
-            {/* CRAFTING WIKI & B2B & LEADERBOARD (Tetap Sama) */}
             <section id="crafting" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
                 <div className="text-center max-w-3xl mx-auto mb-12">
                     <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
@@ -523,6 +557,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 </div>
                 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* ... (WIKI TETAP SAMA) ... */}
                     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col h-full">
                         <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl mb-4 border border-orange-100">🌲</div>
                         <h3 className="font-black text-lg text-gray-900 mb-4">Lumber / Penebang Kayu</h3>
@@ -615,7 +650,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             <div className="pt-1"><span className="text-orange-600 font-black inline-block w-20">Berlian</span> <span className="text-xs text-gray-500 font-medium">➔ 15 Biji Berlian + 5 Kayu G.</span></div>
                         </div>
                     </div>
-
                 </div>
                 
                 <div className="mt-10 bg-gray-900 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">

@@ -82,6 +82,8 @@ require __DIR__.'/auth.php';
 // RUTE RECEIPT
 
 Route::get('/receipt/{transaction}', [TransactionController::class, 'receipt'])->name('pos.receipt');
+// Tambahkan baris ini di routes/web.php
+Route::get('/price-updates', [\App\Http\Controllers\ItemController::class, 'getRecentUpdates']);
 
 
 // ==========================================

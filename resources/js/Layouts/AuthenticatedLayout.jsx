@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from '@inertiajs/react';
+import axios from 'axios';
 
 export default function AuthenticatedLayout({ user, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -8,6 +9,44 @@ export default function AuthenticatedLayout({ user, children }) {
     // Logika Hak Akses
     const isAdmin = user.role === 'admin';
     const isVIP = user.role === 'admin' || user.role === 'vip';
+
+    // ==========================================
+    // FITUR: RADAR PENGUMUMAN HARGA (POLLING)
+    // ==========================================
+    const [announcement, setAnnouncement] = useState('');
+    const [showAnnouncement, setShowAnnouncement] = useState(false);
+    const [lastMessage, setLastMessage] = useState('');
+
+    useEffect(() => {
+        const fetchUpdates = () => {
+            axios.get('/api/price-updates')
+                .then(res => {
+                    const msg = res.data?.message;
+                    // Jika ada pesan baru yang berbeda dari pesan sebelumnya
+                    if (msg && msg !== lastMessage) {
+                        setAnnouncement(msg);
+                        setLastMessage(msg);
+                        setShowAnnouncement(true);
+                        
+                        // Sembunyikan spanduk setelah 15 detik (1 kali lewat)
+                        setTimeout(() => {
+                            setShowAnnouncement(false);
+                        }, 15000);
+                    }
+                })
+                .catch(err => {
+                    // Abaikan jika terjadi error jaringan ringan
+                });
+        };
+
+        fetchUpdates(); // Cek pertama kali
+        
+        // Polling setiap 5 detik (5000 ms) untuk testing.
+        // Nanti jika sudah rilis, ubah ke 10 Menit = 600000
+        const interval = setInterval(fetchUpdates, 5000); 
+        return () => clearInterval(interval);
+    }, [lastMessage]);
+    // ==========================================
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900 selection:bg-orange-500 selection:text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
@@ -217,6 +256,34 @@ export default function AuthenticatedLayout({ user, children }) {
                     </div>
                 </div>
             </nav>
+
+            {/* =========================================
+                PENGUMUMAN HARGA BERJALAN (MARQUEE)
+            ========================================= */}
+            {showAnnouncement && (
+                <div className="bg-red-600 border-b border-red-700 py-2.5 overflow-hidden shadow-inner sticky top-20 z-40">
+                    <div className="whitespace-nowrap animate-marquee flex items-center">
+                        <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
+                            <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
+                            {announcement}
+                        </span>
+                        <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
+                            <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
+                            {announcement}
+                        </span>
+                    </div>
+                    <style dangerouslySetInnerHTML={{__html: `
+                        @keyframes marquee {
+                            0% { transform: translateX(100vw); }
+                            100% { transform: translateX(-100%); }
+                        }
+                        .animate-marquee {
+                            display: inline-block;
+                            animation: marquee 15s linear forwards;
+                        }
+                    `}} />
+                </div>
+            )}
 
             {/* =========================================
                 MAIN CONTENT (HALAMAN INTI)

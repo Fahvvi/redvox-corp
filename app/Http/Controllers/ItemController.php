@@ -100,6 +100,27 @@ class ItemController extends Controller
         return back()->with('success', "Harga {$item->name} berhasil diperbarui!");
     }
 
+    // FITUR NOTIF
+    public function getRecentUpdates()
+    {
+        // Cek barang yang harganya diubah dalam 5 detik terakhir (Ubah 'subSeconds(5)' menjadi 'subMinutes(10)' untuk Production nanti)
+        $recentItems = \App\Models\Item::where('updated_at', '>=', now()->subSeconds(5))->get();
+
+        if ($recentItems->isEmpty()) {
+            return response()->json(['message' => null]);
+        }
+
+        $changes = [];
+        foreach ($recentItems as $item) {
+            $sellText = $item->sell_price !== 'LOCKED' ? "$" . $item->sell_price : "CRAFTING";
+            $changes[] = strtoupper($item->name) . " (Beli: $" . $item->buy_price .  ")";
+        }
+
+        $text = implode(" 🔹 ", $changes);
+
+        return response()->json(['message' => $text]);
+    }
+
     public function destroy(Item $item)
     {
         $item->delete();
