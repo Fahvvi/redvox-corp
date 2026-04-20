@@ -89,34 +89,69 @@ class ItemController extends Controller
     }
 
     // PERBAIKAN: "Item $item" ditulis dengan benar
-    public function update(Request $request, Item $item) 
+    public function update(Request $request, $id) 
     {
-        $request->validate([
-            'buy_price' => 'required|numeric|min:0',
-            'sell_price' => 'required|numeric|min:0',
-        ]);
+        // 1. Cari barang secara manual (mencegah error 405 / Route Binding)
+        $item = \App\Models\Item::findOrFail($id);
 
-        $item->update($request->only(['buy_price', 'sell_price']));
-        return back()->with('success', "Harga {$item->name} berhasil diperbarui!");
+        // 2. Amankan harga beli lama SEBELUM di-update
+        $oldBuyPrice = $item->buy_price;
+
+        // 3. Siapkan data yang akan diupdate (dari form React)
+        $dataToUpdate = $request->all();
+
+        // 4. Suntikkan harga lama ke kolom previous_buy_price
+        $dataToUpdate['previous_buy_price'] = $oldBuyPrice;
+
+        // 5. Eksekusi update ke database (Hanya 1 kali panggil)
+        $item->update($dataToUpdate);
+
+        // --- OPSIONAL: SUNTIKAN DISCORD WEBHOOK ---
+        /*
+        $webhookUrl = 'URL_WEBHOOK_ANDA';
+        \Illuminate\Support\Facades\Http::post($webhookUrl, [
+            'content' => "📢 **Update Harga:** " . strtoupper($item->name) . " sekarang $" . $item->buy_price . " (Sebelumnya $" . $oldBuyPrice . ")"
+        ]);
+        */
+
+        return redirect()->back()->with('success', 'Barang berhasil diupdate.');
     }
 
     // FITUR NOTIF
     public function getRecentUpdates()
     {
-        // Cek barang yang harganya diubah dalam 5 detik terakhir (Ubah 'subSeconds(5)' menjadi 'subMinutes(10)' untuk Production nanti)
-        $recentItems = \App\Models\Item::where('updated_at', '>=', now()->subSeconds(5))->get();
+        // CACHE MAGIC: Kita simpan hasil pencarian di RAM selama 5 detik.
+        // Walau ada 1.000 ketukan per detik, Database HANYA dicek 1 kali tiap 5 detik!
+        $text = \Illuminate\Support\Facades\Cache::remember('recent_price_updates', 5, function () {
+            
+            // Cari barang yang diubah dalam 10 MENIT terakhir (subMinutes(10))
+            $recentItems = \App\Models\Item::where('updated_at', '>=', now()->subMinutes(10))->get();
 
-        if ($recentItems->isEmpty()) {
-            return response()->json(['message' => null]);
-        }
+            if ($recentItems->isEmpty()) {
+                return null;
+            }
 
-        $changes = [];
-        foreach ($recentItems as $item) {
-            $sellText = $item->sell_price !== 'LOCKED' ? "$" . $item->sell_price : "CRAFTING";
-            $changes[] = strtoupper($item->name) . " (Beli: $" . $item->buy_price .  ")";
-        }
+            $changes = [];
+            foreach ($recentItems as $item) {
+                $currentPrice = $item->buy_price;
+                // Jika harga lama kosong, anggap sama dengan harga baru
+                $prevPrice = $item->previous_buy_price ?? $currentPrice; 
+                
+                $diff = $currentPrice - $prevPrice;
+                $diffText = "";
+                
+                if ($diff > 0) {
+                    $diffText = " (+$" . $diff . ")"; // Harga Naik
+                } elseif ($diff < 0) {
+                    $diffText = " (-$" . abs($diff) . ")"; // Harga Turun
+                }
 
-        $text = implode(" 🔹 ", $changes);
+                // Format: BENSIN: $150 (+$50)
+                $changes[] = strtoupper($item->name) . ": $" . $currentPrice . $diffText;
+            }
+
+            return implode(" 🔹 ", $changes);
+        });
 
         return response()->json(['message' => $text]);
     }

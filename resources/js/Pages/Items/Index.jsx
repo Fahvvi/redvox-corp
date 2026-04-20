@@ -33,7 +33,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         // Sembunyikan spanduk setelah 15 detik (1 kali lewat)
                         setTimeout(() => {
                             setShowAnnouncement(false);
-                        }, 15000);
+                        }, 35000);
                     }
                 })
                 .catch(err => {
@@ -269,29 +269,26 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                     PENGUMUMAN HARGA BERJALAN (MARQUEE)
                 ========================================= */}
                 {showAnnouncement && (
-                    <div className="bg-red-600 border-b border-red-700 py-2.5 overflow-hidden shadow-inner absolute w-full z-40 left-0 top-20">
-                        <div className="whitespace-nowrap animate-marquee flex items-center">
-                            <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
-                                <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
-                                {announcement}
-                            </span>
-                            <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
-                                <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
-                                {announcement}
-                            </span>
-                        </div>
-                        <style dangerouslySetInnerHTML={{__html: `
-                            @keyframes marquee {
-                                0% { transform: translateX(100vw); }
-                                100% { transform: translateX(-100%); }
-                            }
-                            .animate-marquee {
-                                display: inline-block;
-                                animation: marquee 15s linear forwards;
-                            }
-                        `}} />
+                <div className="bg-red-600 border-b border-red-800 py-3 overflow-hidden shadow-md relative z-40">
+                    <div className="whitespace-nowrap animate-marquee flex items-center">
+                        <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
+                            <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
+                            {announcement}
+                        </span>
                     </div>
-                )}
+                    <style dangerouslySetInnerHTML={{__html: `
+                        @keyframes marquee {
+                            0% { transform: translateX(100vw); }
+                            100% { transform: translateX(-100%); }
+                        }
+                        .animate-marquee {
+                            display: inline-block;
+                            /* UBAH 15s MENJADI 35s */
+                            animation: marquee 35s linear forwards; 
+                        }
+                    `}} />
+                </div>
+            )}
                 {/* ----------------------------------------- */}
 
             </nav>
