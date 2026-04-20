@@ -22,7 +22,7 @@ export default function AuthenticatedLayout({ user, children }) {
                         {/* Kiri: Logo & Menu Desktop */}
                         <div className="flex items-center gap-x-8 lg:gap-x-12">
                             <Link href="/dashboard" className="text-2xl md:text-3xl font-black tracking-wider text-orange-500 hover:scale-105 transition transform">
-                                REDVOX<span className="text-gray-900">.</span>
+                                REDFOX<span className="text-gray-900">.</span>
                             </Link>
 
                             {/* Menu Desktop (Disembunyikan di layar kecil) */}
