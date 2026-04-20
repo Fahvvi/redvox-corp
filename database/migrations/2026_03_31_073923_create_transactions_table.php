@@ -20,6 +20,9 @@ return new class extends Migration
             $table->integer('total_amount'); // Total belanja (contoh: $15.000)
             $table->integer('deposit_deduction')->default(0); // Berapa yang diambil dari deposit
             $table->integer('cash_deduction')->default(0); // Berapa yang diambil dari uang cash Fico
+            $table->string('action_type')->default('beli'); // 'beli' atau 'jual'
+            $table->string('transaction_type')->default('standar'); // 'standar', 'korporat', 'dinamis'
+            $table->integer('dynamic_adjustment')->default(0); // Nominal penyesuaian manual
             $table->text('notes')->nullable();
             $table->timestamps();
         });

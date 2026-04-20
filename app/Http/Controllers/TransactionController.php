@@ -199,9 +199,18 @@ class TransactionController extends Controller
     // ==========================================
     // 3. FUNGSI UNTUK MENAMPILKAN STRUK (RECEIPT)
     // ==========================================
-    public function receipt(Transaction $transaction)
+    public function receipt($id)
     {
-        $transaction->load(['cashier', 'items.item']);
-        return Inertia::render('POS/Receipt', ['transaction' => $transaction]);
+        $transaction = \App\Models\Transaction::with(['items.item', 'cashier'])->findOrFail($id);
+
+        // LOGIKA KADALUARSA (24 JAM)
+        // Cek jika selisih waktu pembuatan dengan waktu saat ini lebih dari 24 jam
+        if ($transaction->created_at->diffInHours(now()) >= 24) {
+            abort(404, 'Struk ini sudah kadaluarsa dan tidak dapat dilihat lagi oleh publik demi keamanan data Redfox Corp.');
+        }
+
+        return inertia('POS/Receipt', [
+            'transaction' => $transaction
+        ]);
     }
 }

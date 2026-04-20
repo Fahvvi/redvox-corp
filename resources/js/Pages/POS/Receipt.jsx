@@ -11,19 +11,17 @@ export default function Receipt({ transaction }) {
 
     // Fungsi untuk Copy Link In-Game
     const handleCopyLink = () => {
-        // Format teks yang enak dibaca untuk PM di dalam game
         const pmText = `[Redfox Corp] Struk Transaksi #${transaction.invoice_number} dapat dilihat di sini: ${window.location.href}`;
         
         navigator.clipboard.writeText(pmText).then(() => {
             setCopied(true);
-            setTimeout(() => setCopied(false), 3000); // Kembali normal setelah 3 detik
+            setTimeout(() => setCopied(false), 3000); 
         }).catch(err => {
             console.error('Gagal menyalin teks: ', err);
             alert('Browser tidak mengizinkan copy otomatis. Silakan copy URL secara manual.');
         });
     };
 
-    // Fallback jika database lama belum ada field action_type
     const actionType = transaction.action_type || 'beli';
     const transType = transaction.transaction_type || 'standar';
     const adjustment = parseFloat(transaction.dynamic_adjustment) || 0;
@@ -34,11 +32,12 @@ export default function Receipt({ transaction }) {
 
             {/* Tombol Aksi (Disembunyikan saat di-print) */}
             <div className="mb-6 flex flex-wrap justify-center gap-3 print:hidden">
+                {/* UBAHAN: Tombol Kembali diarahkan ke Halaman Utama (Landing Page) */}
                 <Link 
-                    href={route('kalkulator')} 
+                    href="/" 
                     className="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 font-bold rounded-xl shadow-sm hover:bg-gray-50 transition"
                 >
-                    ⬅ Kembali
+                    🏠 Halaman Utama
                 </Link>
                 
                 <button 

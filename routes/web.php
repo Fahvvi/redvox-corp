@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Kasir & Cetak Struk (Sekarang Warga Biasa Bisa Akses)
         Route::get('/pos', [TransactionController::class, 'create'])->name('pos.create');
         Route::post('/pos', [TransactionController::class, 'store'])->name('pos.store');
-        Route::get('/receipt/{transaction}', [TransactionController::class, 'receipt'])->name('pos.receipt');
+        
     });
 
     // ==========================================
@@ -78,6 +78,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// RUTE RECEIPT
+
+Route::get('/receipt/{transaction}', [TransactionController::class, 'receipt'])->name('pos.receipt');
+
 
 // ==========================================
 // RUTE KHUSUS BOT DISCORD

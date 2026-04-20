@@ -26,7 +26,7 @@ export default function Register() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 selection:bg-orange-500 selection:text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            <Head title="Pendaftaran Karyawan - Redvox Corp" />
+            <Head title="Pendaftaran Karyawan - Redfox Corp" />
 
             {/* KARTU UTAMA */}
             <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row md:h-[550px]">
@@ -46,7 +46,7 @@ export default function Register() {
                             <div className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                                 <span className="text-xl">📦</span>
                             </div>
-                            <span className="text-2xl font-black tracking-wider text-white">REDVOX<span className="text-orange-500">.</span></span>
+                            <span className="text-2xl font-black tracking-wider text-white">REDFOX<span className="text-orange-500">.</span></span>
                         </Link>
                     </div>
 
@@ -55,7 +55,7 @@ export default function Register() {
                             Registrasi <br/> Akses Sistem.
                         </h1>
                         <p className="text-gray-300 text-sm font-medium leading-relaxed max-w-sm">
-                            Daftarkan identitas Anda untuk mendapatkan hak akses ke dalam platform operasional internal Redvox.
+                            Daftarkan identitas Anda untuk mendapatkan hak akses ke dalam platform operasional internal Redfox.
                         </p>
                         
                         <div className="mt-8 flex gap-8">
@@ -85,7 +85,7 @@ export default function Register() {
                             </div>
                             <h2 className="text-2xl font-black text-gray-900 mb-3">Pendaftaran Diterima!</h2>
                             <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed px-4">
-                                Data identitas Anda telah masuk ke dalam sistem Redvox Corp. <br/><br/>
+                                Data identitas Anda telah masuk ke dalam sistem Redfox Corp. <br/><br/>
                                 Saat ini akun Anda berstatus <b className="text-orange-600 bg-orange-50 px-2 py-1 rounded">Menunggu Persetujuan Admin</b>. Anda baru dapat mengakses portal setelah pendaftaran ini divalidasi.
                             </p>
                             <Link href="/" className="inline-flex justify-center items-center px-6 py-3 bg-gray-900 hover:bg-orange-500 text-white rounded-xl font-bold text-sm shadow-md transition-all">
@@ -98,7 +98,7 @@ export default function Register() {
                             <div className="md:hidden mb-6">
                                 <Link href="/" className="flex items-center gap-2">
                                     <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-sm border border-orange-200">📦</div>
-                                    <span className="text-xl font-black tracking-wider text-gray-900">REDVOX<span className="text-orange-500">.</span></span>
+                                    <span className="text-xl font-black tracking-wider text-gray-900">REDFOX<span className="text-orange-500">.</span></span>
                                 </Link>
                             </div>
 
@@ -135,7 +135,7 @@ export default function Register() {
                                         <input
                                             id="email" type="email" name="email" value={data.email}
                                             className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition text-gray-800 text-sm font-medium placeholder-gray-400"
-                                            placeholder="nama@redvoxcorp.com" autoComplete="username" required
+                                            placeholder="nama@redfoxcorp.com" autoComplete="username" required
                                             onChange={(e) => setData('email', e.target.value)}
                                         />
                                     </div>
@@ -187,7 +187,7 @@ export default function Register() {
 
                             <div className="mt-6 text-center pt-6 border-t border-gray-100">
                                 <p className="text-[11px] text-gray-400 font-medium mb-2">
-                                    © {new Date().getFullYear()} Redvox Corp System.
+                                    © {new Date().getFullYear()} Redfox Corp System.
                                 </p>
                                 <p className="text-xs text-gray-600 font-medium">
                                     Sudah memiliki akses VIP? <Link href={route('login')} className="text-orange-600 font-bold hover:underline">Login sekarang</Link>

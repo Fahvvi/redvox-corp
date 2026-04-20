@@ -11,7 +11,8 @@ class Transaction extends Model
     protected $fillable = [
         'invoice_number', 'cashier_id', 'supplier_name', 
         'location', 'total_amount', 'deposit_deduction', 
-        'cash_deduction', 'notes'
+        'cash_deduction', 'notes','action_type', 'transaction_type'
+        ,'dynamic_adjustment'
     ];
 
     public function cashier(): BelongsTo

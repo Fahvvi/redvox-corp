@@ -19,7 +19,7 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 selection:bg-orange-500 selection:text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
-            <Head title="Login Karyawan - Redvox Corp" />
+            <Head title="Login Karyawan - Redfox Corp" />
 
             {/* KARTU UTAMA (Dibatasi tingginya agar tidak perlu scroll di PC) */}
             <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row md:h-[550px]">
@@ -42,7 +42,7 @@ export default function Login({ status, canResetPassword }) {
                             <div className="w-10 h-10 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                                 <span className="text-xl">📦</span>
                             </div>
-                            <span className="text-2xl font-black tracking-wider text-white">REDVOX<span className="text-orange-500">.</span></span>
+                            <span className="text-2xl font-black tracking-wider text-white">REDFOX<span className="text-orange-500">.</span></span>
                         </Link>
                     </div>
 
@@ -77,7 +77,7 @@ export default function Login({ status, canResetPassword }) {
                     <div className="md:hidden mb-8">
                         <Link href="/" className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-sm border border-orange-200">📦</div>
-                            <span className="text-xl font-black tracking-wider text-gray-900">REDVOX<span className="text-orange-500">.</span></span>
+                            <span className="text-xl font-black tracking-wider text-gray-900">REDFOX<span className="text-orange-500">.</span></span>
                         </Link>
                     </div>
 
@@ -99,7 +99,7 @@ export default function Login({ status, canResetPassword }) {
                                 <input
                                     id="email" type="email" name="email" value={data.email}
                                     className="w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition text-gray-800 text-sm font-medium placeholder-gray-400"
-                                    placeholder="nama@redvoxcorp.com" autoComplete="username" autoFocus required
+                                    placeholder="nama@redfoxcorp.com" autoComplete="username" autoFocus required
                                     onChange={(e) => setData('email', e.target.value)}
                                 />
                             </div>
@@ -152,7 +152,7 @@ export default function Login({ status, canResetPassword }) {
 
                     <div className="mt-8 text-center pt-6 border-t border-gray-100">
                         <p className="text-[11px] text-gray-400 font-medium mb-2">
-                            © {new Date().getFullYear()} Redvox Corp System.
+                            © {new Date().getFullYear()} Redfox Corp System.
                         </p>
                         <p className="text-xs text-gray-600 font-medium">
                             Belum mendaftar akses VIP? <Link href={route('register')} className="text-orange-600 font-bold hover:underline">Daftar sekarang</Link>

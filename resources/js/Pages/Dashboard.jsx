@@ -19,7 +19,7 @@ export default function Dashboard({ auth, stats = {} }) {
 
     return (
         <AuthenticatedLayout user={auth.user}>
-            <Head title="Dashboard - Redvox Corp" />
+            <Head title="Dashboard - Redfox Corp" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 
@@ -29,7 +29,7 @@ export default function Dashboard({ auth, stats = {} }) {
                 <div className="bg-gradient-to-r from-orange-500 to-orange-400 rounded-3xl p-8 md:p-10 shadow-lg shadow-orange-500/20 text-white flex justify-between items-center relative overflow-hidden">
                     <div className="relative z-10">
                         <h2 className="text-3xl md:text-4xl font-black mb-2">Selamat Datang, {auth.user.name}!</h2>
-                        <p className="text-orange-100 font-medium text-base md:text-lg">Sistem Manajemen Enterprise Redvox Corp siap digunakan.</p>
+                        <p className="text-orange-100 font-medium text-base md:text-lg">Sistem Manajemen Enterprise Redfox Corp siap digunakan.</p>
                     </div>
                     <div className="text-7xl md:text-8xl relative z-10 hidden md:block opacity-90 drop-shadow-md">🦊</div>
                     <div className="absolute -right-10 -top-10 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
