@@ -20,33 +20,82 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
     useEffect(() => {
         const fetchUpdates = () => {
-            // Mengambil dari /price-updates (bukan /api lagi)
             axios.get('/price-updates')
                 .then(res => {
                     const msg = res.data?.message;
-                    // Jika ada pesan baru yang berbeda dari pesan sebelumnya
                     if (msg && msg !== lastMessage) {
                         setAnnouncement(msg);
                         setLastMessage(msg);
                         setShowAnnouncement(true);
                         
-                        // Sembunyikan spanduk setelah 15 detik (1 kali lewat)
                         setTimeout(() => {
                             setShowAnnouncement(false);
                         }, 35000);
                     }
                 })
-                .catch(err => {
-                    // Abaikan jika terjadi error jaringan ringan
-                });
+                .catch(err => {});
         };
 
-        fetchUpdates(); // Cek pertama kali
-        
-        // Polling setiap 5 detik (5000 ms) untuk testing.
+        fetchUpdates();
         const interval = setInterval(fetchUpdates, 5000); 
         return () => clearInterval(interval);
     }, [lastMessage]);
+
+    // ==========================================
+    // DATA & STATE: INFO SIDEJOB (MODAL)
+    // ==========================================
+    const [selectedJob, setSelectedJob] = useState(null); // Menyimpan job yang sedang diklik
+
+    const sidejobs = [
+        { 
+            id: 1, 
+            title: 'Tambang Batu', 
+            icon: '🪨', 
+            desc: 'Lokasi penambangan batu untuk material dasar seperti perak, tembaga, dan emas.', 
+            fullDesc: 'Di area penambangan ini, Anda bisa mendapatkan Biji Perak, Tembaga, Belerang, Emas, dan Berlian. Datang ke daerah Flint County lalu bicaralah dengan petugas disana, ambil pekerjaan dan turun kebawah.',
+            image: '/images/sidejob-tambang.jpg'
+        },
+        { 
+            id: 2, 
+            title: 'Peternakan', 
+            icon: '🐄', 
+            desc: 'Area peternakan hewan untuk diambil daging, bulu, dan kotorannya.', 
+            fullDesc: 'Lokasi peternakan berada di Blueberry Access. Anda bisa mengumpulkan Daging Ayam, Daging Sapi Merah, Bulu, dan Kotoran yang berguna sebagai bahan dasar pembuatan pakaian dan pupuk.',
+            image: '/images/sidejob-peternakan.jpg'
+        },
+        { 
+            id: 3, 
+            title: 'Lumberjack', 
+            icon: '🌲', 
+            desc: 'Penebangan pohon untuk mendapatkan kayu gelondong dan getah.', 
+            fullDesc: 'Kerja keras memotong pohon di hutan Panopticon, dekat dengan Blueberry Access. Hasil dari pekerjaan ini adalah Kayu Gelondong dan Getah. Sangat penting untuk membuat Kayu Halus dan Lem Kayu.',
+            image: '/images/sidejob-lumberjack.jpg'
+        },
+        { 
+            id: 4, 
+            title: 'Penjahit', 
+            icon: '🧵', 
+            desc: 'Pusat konveksi untuk memproses bulu ayam menjadi pakaian jadi.', 
+            fullDesc: 'Di tempat penjahit yang berada di sekitar Marina, Anda bisa mengolah Bulu Ayam menjadi Benang, Benang menjadi Kain, dan Kain menjadi Pakaian siap jual dengan nilai tinggi.',
+            image: '/images/sidejob-penjahit.jpg'
+        },
+        { 
+            id: 5, 
+            title: 'Tambang Minyak', 
+            icon: '🛢️', 
+            desc: 'Pengeboran minyak mentah untuk dijadikan bahan bakar.', 
+            fullDesc: 'Area pengeboran minyak mentah yang berlokasi di Ocean Docks, dekat dengan Dealer Mobil Diamond. Anda bisa mengolah minyak yang didapat di sini menjadi Bensin, Solar, Disel, hingga Avtur.',
+            image: '/images/sidejob-tambangminyak.jpg'
+        },
+        { 
+            id: 6, 
+            title: 'Berburu', 
+            icon: '🦌', 
+            desc: 'Perburuan hewan di hutan Panopticon untuk mendapatkan kulit.', 
+            fullDesc: 'Gunakan senapan berburu Anda di area hutan yang diizinkan. Kulit hewan buruan memiliki nilai jual tersendiri di pasar Redfox.',
+            image: '/images/sidejob-berburu.jpg'
+        },
+    ];
     // ==========================================
 
     const categories = useMemo(() => {
@@ -169,6 +218,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
             <Head title="Redfox Corp - Market Hub" />
 
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 transition-all duration-300">
+                {/* ... (KODE NAVBAR DESKTOP & MOBILE TETAP SAMA) ... */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         <div className="flex items-center">
@@ -181,6 +231,10 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             <div className="flex items-center gap-6">
                                 <a href="#kalkulator" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
                                     Kalkulator
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
+                                </a>
+                                <a href="#sidejob" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
+                                    Info Sidejob
                                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-orange-500 transition-all group-hover:w-full"></span>
                                 </a>
                                 <a href="#crafting" className="text-sm text-gray-500 hover:text-orange-500 transition relative group">
@@ -201,13 +255,11 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
                             {auth.user ? (
                                 <Link href={route('dashboard')} className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 hover:bg-orange-500 text-white rounded-full shadow-md transition transform hover:-translate-y-0.5 text-sm">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
                                     Dashboard
                                 </Link>
                             ) : (
                                 <div className="flex items-center gap-3">
                                     <Link href={route('login')} className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-full transition text-sm border border-gray-200">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
                                         Masuk
                                     </Link>
                                     <Link href={route('register')} className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-md transition transform hover:-translate-y-0.5 text-sm">
@@ -235,6 +287,9 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                     <div className="px-4 py-6 flex flex-col gap-2">
                         <a href="#kalkulator" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
                             <span className="text-lg">🧮</span> Kalkulator Pengepul
+                        </a>
+                        <a href="#sidejob" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
+                            <span className="text-lg">🗺️</span> Info Sidejob
                         </a>
                         <a href="#crafting" onClick={() => setShowingMobileMenu(false)} className="px-4 py-3 text-sm font-bold text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition flex items-center gap-3">
                             <span className="text-lg">🛠️</span> Panduan Crafting
@@ -265,31 +320,26 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                     </div>
                 </div>
 
-                {/* =========================================
-                    PENGUMUMAN HARGA BERJALAN (MARQUEE)
-                ========================================= */}
                 {showAnnouncement && (
-                <div className="bg-red-600 border-b border-red-800 py-3 overflow-hidden shadow-md relative z-40">
-                    <div className="whitespace-nowrap animate-marquee flex items-center">
-                        <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
-                            <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
-                            {announcement}
-                        </span>
+                    <div className="bg-red-600 border-b border-red-800 py-3 overflow-hidden shadow-md relative z-40">
+                        <div className="whitespace-nowrap animate-marquee flex items-center">
+                            <span className="text-white font-black text-sm md:text-base px-8 tracking-wide">
+                                <span className="text-yellow-300 mr-2">⚠️ UPDATE PASAR:</span> 
+                                {announcement}
+                            </span>
+                        </div>
+                        <style dangerouslySetInnerHTML={{__html: `
+                            @keyframes marquee {
+                                0% { transform: translateX(100vw); }
+                                100% { transform: translateX(-100%); }
+                            }
+                            .animate-marquee {
+                                display: inline-block;
+                                animation: marquee 35s linear forwards; 
+                            }
+                        `}} />
                     </div>
-                    <style dangerouslySetInnerHTML={{__html: `
-                        @keyframes marquee {
-                            0% { transform: translateX(100vw); }
-                            100% { transform: translateX(-100%); }
-                        }
-                        .animate-marquee {
-                            display: inline-block;
-                            /* UBAH 15s MENJADI 35s */
-                            animation: marquee 35s linear forwards; 
-                        }
-                    `}} />
-                </div>
-            )}
-                {/* ----------------------------------------- */}
+                )}
 
             </nav>
 
@@ -314,8 +364,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
             )}
 
             <section id="kalkulator" className="py-12 md:py-16 px-4 sm:px-6 max-w-7xl mx-auto scroll-mt-20">
-                
-                {/* MENU TIER HARGA (HANYA MUNCUL JIKA SUDAH LOGIN / ADMIN) */}
+                {/* ... (KODE KALKULATOR TETAP SAMA TIDAK DIUBAH) ... */}
                 {auth.user && (
                     <div className="mb-8 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
                         <div className="text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Tipe Kemitraan:</div>
@@ -356,7 +405,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    
                     <div className="lg:col-span-2">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
                             <div>
@@ -462,7 +510,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
                                         return (
                                             <div key={c.id} className="bg-gray-800 p-3 md:p-4 rounded-2xl border border-gray-700 relative group flex flex-col sm:flex-row justify-between gap-3">
-                                                
                                                 <div className="flex-1 pr-6 sm:pr-2">
                                                     <div className="font-bold text-gray-100 text-sm mb-1 break-words leading-tight">
                                                         {c.name} {transactionType === 'korporat' && <span className="text-indigo-400 text-[10px]"> (+33%)</span>}
@@ -474,12 +521,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
 
                                                 <div className="flex items-center justify-between sm:justify-end sm:flex-col gap-2 mt-2 sm:mt-0">
                                                     <div className="flex items-center bg-gray-900 border border-gray-600 rounded-lg overflow-hidden h-9 md:h-10">
-                                                        <button 
-                                                            onClick={() => decrementQty(c.id)}
-                                                            className="w-9 h-full bg-gray-700 hover:bg-gray-600 text-white font-black flex items-center justify-center text-lg transition active:bg-gray-500"
-                                                        >
-                                                            -
-                                                        </button>
+                                                        <button onClick={() => decrementQty(c.id)} className="w-9 h-full bg-gray-700 hover:bg-gray-600 text-white font-black flex items-center justify-center text-lg transition active:bg-gray-500">-</button>
                                                         <input 
                                                             type="text" 
                                                             inputMode="numeric"
@@ -488,23 +530,14 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                                                             onBlur={() => handleQtyBlur(c.id)}
                                                             className="w-14 h-full bg-transparent text-white text-sm font-bold text-center outline-none border-none focus:ring-0 p-0 m-0"
                                                         />
-                                                        <button 
-                                                            onClick={() => incrementQty(c.id)}
-                                                            className="w-9 h-full bg-gray-700 hover:bg-gray-600 text-white font-black flex items-center justify-center text-lg transition active:bg-gray-500"
-                                                        >
-                                                            +
-                                                        </button>
+                                                        <button onClick={() => incrementQty(c.id)} className="w-9 h-full bg-gray-700 hover:bg-gray-600 text-white font-black flex items-center justify-center text-lg transition active:bg-gray-500">+</button>
                                                     </div>
-                                                    
-                                                    <div className="text-green-400 font-black text-sm md:text-base whitespace-nowrap">
+                                                    <div className="text-red-400 font-black text-sm md:text-base whitespace-nowrap">
                                                         ${totalItemPrice.toLocaleString(undefined, {maximumFractionDigits: 0})}
                                                     </div>
                                                 </div>
 
-                                                <button 
-                                                    onClick={() => removeFromCart(c.id)}
-                                                    className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs font-bold md:opacity-0 md:group-hover:opacity-100 transition shadow-lg flex items-center justify-center z-10"
-                                                >
+                                                <button onClick={() => removeFromCart(c.id)} className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs font-bold md:opacity-0 md:group-hover:opacity-100 transition shadow-lg flex items-center justify-center z-10">
                                                     ✕
                                                 </button>
                                             </div>
@@ -525,11 +558,9 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </section>
 
-            {/* FLOATING CART SUMMARY UNTUK MOBILE */}
             {cart.length > 0 && (
                 <div className="lg:hidden fixed bottom-4 left-4 right-4 bg-gray-900 border border-gray-700 shadow-2xl rounded-2xl p-4 z-50 flex justify-between items-center animate-bounce-short">
                     <div>
@@ -541,6 +572,47 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                     </a>
                 </div>
             )}
+
+            {/* =========================================
+                INFO SIDEJOB (NEW SECTION DENGAN MODAL)
+            ========================================= */}
+            <section id="sidejob" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
+                <div className="text-center max-w-3xl mx-auto mb-12">
+                    <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-xs font-black uppercase tracking-widest mb-4">
+                        Peta Pekerjaan
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">Lokasi Sidejob di Indolife</h2>
+                    <p className="text-gray-500 font-medium text-lg">
+                        Panduan lokasi untuk mengumpulkan material mentah di kota sebelum disetorkan ke gudang Redfox.
+                    </p>
+                </div>
+
+                <div className="flex overflow-x-auto gap-6 pb-8 custom-scrollbar snap-x snap-mandatory">
+                    {sidejobs.map((job) => (
+                        <div key={job.id} className="min-w-[280px] md:min-w-[320px] bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col flex-shrink-0 snap-center overflow-hidden">
+                            <div className="h-48 bg-gray-100 flex items-center justify-center text-6xl border-b border-gray-100 relative">
+                                {job.icon}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                            </div>
+                            
+                            <div className="p-6 flex flex-col flex-grow">
+                                <h3 className="font-black text-xl text-gray-900 mb-3">{job.id}. {job.title}</h3>
+                                
+                                <p className="text-gray-500 text-sm font-medium mb-6 flex-grow leading-relaxed">
+                                    {job.desc}
+                                </p>
+                                
+                                <button 
+                                    onClick={() => setSelectedJob(job)}
+                                    className="mt-auto w-full py-3 bg-gray-50 hover:bg-orange-50 text-gray-600 hover:text-orange-600 font-bold rounded-xl transition text-sm flex items-center justify-center gap-2 border border-gray-100"
+                                >
+                                    Lihat Detail ➔
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
 
             <section id="crafting" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
                 <div className="text-center max-w-3xl mx-auto mb-12">
@@ -554,7 +626,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                 </div>
                 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* ... (WIKI TETAP SAMA) ... */}
                     <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition flex flex-col h-full">
                         <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl mb-4 border border-orange-100">🌲</div>
                         <h3 className="font-black text-lg text-gray-900 mb-4">Lumber / Penebang Kayu</h3>
@@ -648,16 +719,6 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         </div>
                     </div>
                 </div>
-                
-                <div className="mt-10 bg-gray-900 rounded-3xl p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
-                    <div className="text-center sm:text-left">
-                        <h4 className="text-lg md:text-xl font-black text-white mb-2">Tidak menemukan resep yang dicari?</h4>
-                        <p className="text-gray-400 text-xs md:text-sm font-medium">Temui staf internal Redfox di kota untuk negosiasi material rahasia.</p>
-                    </div>
-                    <div className="px-6 py-3 bg-white/10 border border-gray-700 text-white font-bold rounded-full whitespace-nowrap cursor-not-allowed text-sm">
-                        🔒 Akses Terbatas
-                    </div>
-                </div>
             </section>
 
             <section id="b2b" className="py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-gray-200 scroll-mt-20">
@@ -710,9 +771,9 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                             <div className="absolute inset-0 flex items-center justify-center text-7xl transform group-hover:scale-110 transition duration-500">🔫</div>
                         </div>
                         <div className="p-6 md:p-8 flex flex-col flex-grow">
-                            <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-2">Paket Trio PPS</h3>
+                            <h3 className="text-xl md:text-2xl font-black text-gray-900 mb-2">Paket PTS</h3>
                             <p className="text-gray-500 text-sm mb-8 font-medium flex-grow leading-relaxed">
-                                Suplai logistik "khusus" berlisensi maupun tanpa lisensi. Diperuntukkan bagi penjagaan bisnis atau kebutuhan operasional tingkat tinggi faksi Anda.
+                                Suplai logistik "khusus" diperuntukkan bagi penjagaan bisnis atau kebutuhan operasional tingkat tinggi faksi Anda.
                             </p>
                             <button className="w-full py-3 bg-orange-50 hover:bg-orange-500 text-orange-600 hover:text-white font-bold rounded-xl transition text-sm">
                                 Pesan via IC
@@ -814,10 +875,63 @@ export default function Index({ auth, items, leaderboardData = {} }) {
                         REDFOX<span className="text-gray-200">.</span>
                     </div>
                     <p className="text-gray-400 font-medium text-xs md:text-sm">
-                        © {new Date().getFullYear()} Redfox Corp. Sistem Terintegrasi Faksi Resmi.
+                        © {new Date().getFullYear()} Redfox Corp.
                     </p>
                 </div>
             </footer>
+
+            {/* ==========================================
+                MODAL DETAIL SIDEJOB
+            ========================================== */}
+            {selectedJob && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                    {/* Backdrop (Klik untuk tutup) */}
+                    <div 
+                        className="absolute inset-0 bg-gray-900/70 backdrop-blur-sm transition-opacity" 
+                        onClick={() => setSelectedJob(null)}
+                    ></div>
+
+                    {/* Modal Box */}
+                    <div className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="h-32 sm:h-40 bg-orange-500 flex items-center justify-center text-6xl sm:text-7xl shrink-0">
+                            {selectedJob.icon}
+                        </div>
+                        <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
+                            <div className="flex justify-between items-start mb-4">
+                                <h3 className="text-2xl sm:text-3xl font-black text-gray-900">{selectedJob.title}</h3>
+                                <button onClick={() => setSelectedJob(null)} className="text-gray-400 hover:text-red-500 transition text-2xl leading-none">
+                                    ✕
+                                </button>
+                            </div>
+                            
+                            <div className="text-gray-600 text-sm sm:text-base leading-relaxed mb-8 space-y-4">
+                                <p>{selectedJob.fullDesc || "Deskripsi lengkap belum tersedia."}</p>
+                                
+                                {/* Area Tampil Gambar */}
+                                    {selectedJob.image ? (
+                                        <img 
+                                            src={selectedJob.image} 
+                                            alt={`Lokasi ${selectedJob.title}`} 
+                                            className="w-full h-auto object-cover rounded-xl border border-gray-200 shadow-sm"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-32 bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 font-medium text-xs">
+                                            [ Gambar Peta Belum Tersedia ]
+                                        </div>
+                                    )}
+                            </div>
+
+                            <button 
+                                onClick={() => setSelectedJob(null)}
+                                className="w-full py-3 sm:py-4 bg-gray-900 hover:bg-gray-800 text-white font-black rounded-xl transition shadow-lg text-sm sm:text-base"
+                            >
+                                Tutup Panduan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
