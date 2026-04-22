@@ -69,7 +69,7 @@ export default function Index({ auth, items, leaderboardData = {} }) {
             icon: '🌲', 
             desc: 'Penebangan pohon untuk mendapatkan kayu gelondong dan getah.', 
             fullDesc: 'Kerja keras memotong pohon di hutan Panopticon, dekat dengan Blueberry Access. Hasil dari pekerjaan ini adalah Kayu Gelondong dan Getah. Sangat penting untuk membuat Kayu Halus dan Lem Kayu.',
-            image: '/images/sidejob-lumberjack.jpg'
+            image: '/images/sidejob-lumberjack.png'
         },
         { 
             id: 4, 
